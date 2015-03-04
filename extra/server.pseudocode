@@ -21,23 +21,23 @@ Accept, add client socket
 =========================
 accept a new connection from the server socket
 add the socket to the socket set
+add client meta data to connected clients list
 
 Remove client socket
 ====================
 remove the socket from the socket set
+remove the corresponding client information from connected clients list
 
-Read
-====
-read from,
-
-Echo
-====
+Read & echo
+===========
+read from, data from the client socket
+transmit the read data to all sockets except the one that the data was read from
 
 Update client list
 ==================
-add or remove a client from a list of clients
-redisplay the list of clients through stdout
+redisplay the list of connected clients
 
 Write to file
 =============
+record the chat, disconnect, and connect history to the file
 

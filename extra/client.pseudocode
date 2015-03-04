@@ -1,24 +1,29 @@
 Initialize
 ==========
+parse command line input to get file name, remote address and port, and display name
+connect to the server
+send server our display name or nothing if none
+
+Cleanup
+=======
+disconnect from the server, and release any resources
 
 Selecting
 =========
+call select with a file descriptor set composed of stdin, and the socket
 
 Parse select
 ============
+select has returned, determine which file descriptor caused select to return
 
-Read stdin
-==========
-
-Read socket
-===========
-
-Write socket
+Handle input
 ============
+read data from stdin, and then send the data from std in to the server
 
-Write stdout
-============
+Handle message
+==============
+read data from the socket, and display it
 
 Write file
 ==========
-
+record the chat history to the user specified file
