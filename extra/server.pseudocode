@@ -1,0 +1,43 @@
+Initialize
+==========
+parse command line input to get port number, and file name
+create server socket on the specified port
+open file for appending, or create it if it doesn't exist
+
+Cleanup
+=======
+close all sockets in the socket set
+close the file
+
+Selecting
+=========
+issue a select call on the socket set
+
+Parse select
+============
+loop through socket set, and determine which socket needs attention
+
+Accept, add client socket
+=========================
+accept a new connection from the server socket
+add the socket to the socket set
+
+Remove client socket
+====================
+remove the socket from the socket set
+
+Read
+====
+read from,
+
+Echo
+====
+
+Update client list
+==================
+add or remove a client from a list of clients
+redisplay the list of clients through stdout
+
+Write to file
+=============
+
