@@ -1,12 +1,9 @@
 #include <stdio.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
+#include <netdb.h>
 #include <stdlib.h>
-#include <strings.h>
-#include <arpa/inet.h>
-#include <unistd.h>
+#include <string.h>
+#include <errno.h>
 
-int make_server_socket(short port);
-int make_client_socket(long remoteAddr, short remotePort, short localPort);
-struct sockaddr make_sockaddr(char* remoteName, long remoteAddr, short remotePort);
+int make_tcp_server_socket(short port);
+int make_tcp_client_socket(char* remoteName, long remoteAddr, short remotePort, short localPort);
+struct sockaddr make_sockaddr(char* hostName, long hostAddr, short hostPort);

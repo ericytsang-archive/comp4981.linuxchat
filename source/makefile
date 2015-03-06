@@ -1,5 +1,5 @@
 
-CC   = cc -Wall -W -Wextra -ansi -pedantic
+CC   = g++ -Wall -W -Wextra -ansi -pedantic
 # LIBS = ""
 
 
@@ -19,14 +19,14 @@ client: client.o net_helper.o
 
 
 # main modules
-server.o: server.c
+server.o: server.c server.h
 	$(CC) -c server.c
 
-client.o: client.c
+client.o: client.c client.h
 	$(CC) -c client.c
 
 
 
 # common helper modules
-net_helper.o: net_helper.c
+net_helper.o: net_helper.c net_helper.h
 	$(CC) -c net_helper.c

@@ -40,7 +40,7 @@ int make_tcp_server_socket(short port)
     }
 
     // bind server socket to local host
-    localAddr = make_sockaddr(0, INADDR_ANY, port)
+    localAddr = make_sockaddr(0, INADDR_ANY, port);
     if(bind(svrSock, (struct sockaddr*) &localAddr, sizeof(localAddr)) == -1)
     {
         fatal_error("failed to bind server socket to address structure");
@@ -83,8 +83,6 @@ int make_tcp_server_socket(short port)
  */
 int make_tcp_client_socket(char* remoteName, long remoteAddr, short remotePort, short localPort)
 {
-    // results from gethostbyname query
-    struct hostent* host;
     // local address that client socket is bound to
     struct sockaddr local;
     // remote address that client socket should connect to
@@ -101,7 +99,7 @@ int make_tcp_client_socket(char* remoteName, long remoteAddr, short remotePort, 
     // bind socket to local host if a local port is specified
     if(localPort)
     {
-        local = make_sockaddr(0, INADDR_ANY, localPort)
+        local = make_sockaddr(0, INADDR_ANY, localPort);
         if(bind(clntSock, (struct sockaddr*) &local, sizeof(local)) == -1)
         {
             fatal_error("failed to bind socket to local host");
@@ -149,39 +147,46 @@ int make_tcp_client_socket(char* remoteName, long remoteAddr, short remotePort, 
  */
 struct sockaddr make_sockaddr(char* hostName, long hostAddr, short hostPort)
 {
-    // results from gethostbyname query
-    struct hostent* host;
     // address that client socket should connect to
     struct sockaddr_in addr;
 
-    // hostName is not provided; just set up address structure...
+    // set up port and protocol of address structure
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_family      = AF_INET;
+    addr.sin_port        = htons(hostPort);
+
     if(hostName == 0)
     {
-        // set up address structure for host
-        memset(&addr, 0, sizeof(addr));
-        addr.sin_family = AF_INET;
-        addr.sin_port   = htons(hostPort);
-        addr.sin_addr   = htonl(hostAddr);
-    }
+        /*
+         * hostName is not provided; just use {hostAddr} as address...
+         */
 
-    // hostName is provided; do query for host then set up address structure...
+        // set address structure's address
+        addr.sin_addr.s_addr = htonl(hostAddr);
+    }
     else
     {
+        /*
+         * hostName is provided; do query for host then result as address...
+         */
+
         // resolve host (if needed)
+        struct hostent* host;
         if((host = gethostbyname(hostName)) == 0)
         {
             fatal_error("failed to resolve host");
         }
 
-        // set up address structure for host
-        memset(&addr, 0, sizeof(addr));
-        addr.sin_family = AF_INET;
-        addr.sin_port   = htons(hostPort);
+        // set address structure's address from query results
         memcpy(&addr.sin_addr, host->h_addr, host->h_length);
     }
 
     // return...
-    return (sockaddr) addr;
+    {
+        struct sockaddr ret;
+        memcpy(&ret, &addr, sizeof(ret));
+        return ret;
+    }
 }
 
 static void fatal_error(const char* errstr)
