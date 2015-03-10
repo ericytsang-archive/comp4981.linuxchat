@@ -7,16 +7,18 @@
 
 #define MSG_BUF_LEN 80
 
-#define MSG_T_CHAT 0
+#define MSG_T_CHAT        0
+#define MSG_T_CLIENT_DATA 1
 
 typedef struct
 {
-    char name[80];
+    char name[MSG_BUF_LEN];
 } ClientInfo;
 
 typedef union
 {
     char message[MSG_BUF_LEN];
+    ClientInfo clientInfo;
 } Payload;
 
 typedef struct

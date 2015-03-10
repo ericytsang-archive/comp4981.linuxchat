@@ -56,6 +56,28 @@ int main (int argc, char** argv)
     return 0;
 }
 
+/**
+ * parses command line arguments from argc, and argv into the args structure.
+ *
+ * @function   get_cmd_ln_args
+ *
+ * @date       2015-03-10
+ *
+ * @revision   none
+ *
+ * @designer   Eric Tsang
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  static void get_cmd_ln_args(Arguments* args,int argc, char**
+ *   argv)
+ *
+ * @param      args pointer to an args structre.
+ * @param      argc number of command line arguments.
+ * @param      argv array of strings, each string is a command line argument.
+ */
 static void get_cmd_ln_args(Arguments* args, int argc, char** argv)
 {
     char optstring[] = "p:f:d:a:";
@@ -132,6 +154,27 @@ static void get_cmd_ln_args(Arguments* args, int argc, char** argv)
     }
 }
 
+/**
+ * monitors stdin, and the socket connected with the server for activity, and
+ *   when activity is detected, it deals with it.
+ *
+ * @function   client_loop
+ *
+ * @date       2015-03-10
+ *
+ * @revision   none
+ *
+ * @designer   Eric Tsang
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  static void client_loop(int socket, int file)
+ *
+ * @param      socket socket that's connected to the server to monitor.
+ * @param      file file to record chat history to.
+ */
 static void client_loop(int socket, int file)
 {
     Files files;
@@ -162,6 +205,28 @@ static void client_loop(int socket, int file)
     }
 }
 
+/**
+ * handles stream activity. reads from the stream, and then sends the data read
+ *   from the stream to the server through the socket that's connected with the
+ *   server.
+ *
+ * @function   handle_stream_activity
+ *
+ * @date       2015-03-10
+ *
+ * @revision   none
+ *
+ * @designer   Eric Tsang
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  static void handle_stream_activity(int socket, int file)
+ *
+ * @param      socket socket that's connected with the server.
+ * @param      file descriptor to file to record chat history into.
+ */
 static void handle_stream_activity(int socket, int file)
 {
     Message msg;    // message structure sent out socket
@@ -187,6 +252,27 @@ static void handle_stream_activity(int socket, int file)
     while(string[strlen(string)-1] != '\n');
 }
 
+/**
+ * handles socket activity. reads from the socket, and calls handle_message if a
+ *   message was read from the socket, ends the application otherwise.
+ *
+ * @function   handle_socket_activity
+ *
+ * @date       2015-03-10
+ *
+ * @revision   none
+ *
+ * @designer   Eric Tsang
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  static void handle_socket_activity(int socket, int file)
+ *
+ * @param      socket socket that's connected to the server.
+ * @param      file file to record chat history into.
+ */
 static void handle_socket_activity(int socket, int file)
 {
     int result;     // result of reading from the socket
@@ -209,6 +295,25 @@ static void handle_socket_activity(int socket, int file)
     }
 }
 
+/**
+ * handles a message received from the socket that is connected to the server.
+ *
+ * @function   handle_message
+ *
+ * @date       2015-03-10
+ *
+ * @revision   none
+ *
+ * @designer   Eric Tsang
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  static void handle_message(Message msg)
+ *
+ * @param      msg message received from the server
+ */
 static void handle_message(Message msg)
 {
     // parse message structure
@@ -223,6 +328,26 @@ static void handle_message(Message msg)
     }
 }
 
+/**
+ * prints out the passed error message using perror, then terminates the
+ *   application.
+ *
+ * @function   fatal_error
+ *
+ * @date       2015-03-10
+ *
+ * @revision   none
+ *
+ * @designer   Eric Tsang
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  static void fatal_error(const char* errstr)
+ *
+ * @param      errstr string to print out using perror.
+ */
 static void fatal_error(const char* errstr)
 {
     perror(errstr);
