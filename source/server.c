@@ -1,11 +1,16 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <getopt.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <map>
+#include "net_helper.h"
+#include "select_helper.h"
 
 // globals for getopt
-extern char *optarg = 0;
-extern int optind   = 0;
-extern int opterr   = 0;
+extern char *optarg;
+extern int optind;
+extern int opterr;
 
 typedef struct
 {
@@ -16,28 +21,36 @@ Arguments;
 
 static void fatal_error(const char* errstr);
 static void get_cmd_ln_args(Arguments* args, int argc, char** argv);
+static void server_loop(int serverSocket, int fileDescriptor);
 
 int main (int argc, char** argv)
 {
     int serverSocket;
+    int fileDescriptor;
     Arguments args;
+    args.port = 0;
+    args.filePath = 0;
 
+    // get command line arguments
     get_cmd_ln_args(&args, argc, argv);
 
     // open file to record chat history to
-    open(/*file*/);
+    if((fileDescriptor = open(args.filePath, 0)) < 0)
+    {
+        fatal_error("failed to open the file");
+    }
 
     // open the server socket
-    serverSocket = make_tcp_server_socket(args->port);
+    serverSocket = make_tcp_server_socket(args.port);
 
     // do the server loop
-    server_loop(serverSocket);
+    server_loop(serverSocket, fileDescriptor);
 
     // close the server socket
     close(serverSocket);
 
     // close the file
-    close(/*file*/);
+    close(fileDescriptor);
 
     return 0;
 }
@@ -45,46 +58,86 @@ int main (int argc, char** argv)
 static void server_loop(int serverSocket, int fileDescriptor)
 {
 
-    // set up the socket set
+    // set up the socket set & client list
+    std::map<int, ClientInfo> clients;
+    Files files;
+    files_init(&files);
 
-    while(?)
+    files_add_file(&files, serverSocket);
+
+    while(true)
     {
         // wait for an event on any socket to occur
-
-        if(FD_ISSET(serverSocket))
+        if(files_select(&files) == -1)
         {
-            // accept the connection
-            // add connection to socket set
+            fatal_error("failed on select");
         }
 
-        for(/*loop through the rest of the sockets*/)
+        if(FD_ISSET(serverSocket, &files.selectFds))
         {
-            if(!FD_ISSET(/*currentSocket*/))
+            // accept the connection, add it to socket set, & client list
+            int newSocket = accept(serverSocket, 0, 0);
+            files_add_file(&files, newSocket);
+            ClientInfo newClient;
+            clients[newSocket] = newClient;
+            continue;
+        }
+
+        for(auto socketIt = files.fdSet.begin(); socketIt != files.fdSet.end();
+            ++socketIt)
+        {
+            int selectedSocket = *socketIt;
+            ClientInfo* client = &clients[selectedSocket];
+            char output[1024];
+            int bytesToRead;
+            int bytesRead;
+            char* bufferPointer;
+            Message msg;
+
+            if(selectedSocket == serverSocket
+                || !FD_ISSET(selectedSocket, &files.selectFds))
             {
                 continue;
             }
 
-            // read from the socket
-            switch(/*read result*/)
+            // read message from socket
+            bufferPointer = (char*) &msg;
+            bytesToRead = sizeof(Message);
+            while ((bytesRead = read(selectedSocket, bufferPointer, bytesToRead)) > 0)
             {
-            case /*error*/:
-            case /*eof*/:
-                // remove the socket from socket set
-                // remove the socket from socket list
+                bufferPointer += bytesRead;
+                bytesToRead -= bytesRead;
+            }
+
+            // handle socket read result
+            switch(bytesRead)
+            {
+            case -1:
+            case 0:
+                // remove the socket from socket set and socket list
+                files_rm_file(&files, selectedSocket);
+                clients.erase(selectedSocket);
+
                 // write update to file
+                sprintf(output, "socket %d disconnected\n", selectedSocket);
+                write(fileDescriptor, output, strlen(output));
+                printf("%s", output);
+
                 // close the socket
+                close(selectedSocket);
                 break;
-            case /*sucess*/:
-                if(/*control message*/)
-                {
-                    // add connection to socket list
-                    // write update to file
-                }
-                else
-                {
-                    send_to_all_except(/*read data*/, /*sending socket*/);
-                    // write update to file
-                }
+            default:
+                send(selectedSocket, "output", strlen("output"), 0);
+                // if(/*control message*/)
+                // {
+                //     // add connection to socket list
+                //     // write update to file
+                // }
+                // else
+                // {
+                //     // send_to_all_except(/*read data*/, /*sending socket*/);
+                //     // write update to file
+                // }
                 break;
             }
         }
@@ -93,7 +146,7 @@ static void server_loop(int serverSocket, int fileDescriptor)
 
 static void get_cmd_ln_args(Arguments* args, int argc, char** argv)
 {
-    char optstring[] = "p:f";
+    char optstring[] = "p:f:";
     int ret;
 
     while ((ret = getopt (argc, argv, optstring)) != -1)
@@ -123,12 +176,15 @@ static void get_cmd_ln_args(Arguments* args, int argc, char** argv)
             }
             break;
         case '?':
-            printf("%s\n", "unrecognized switch: ", optarg);
+            printf("unrecognized switch: %s\n", optarg);
             break;
         }
     }
 
-    fatal_error("failed to parse command line arguments");
+    if (optind < argc)
+    {
+        fatal_error("failed to parse command line arguments");
+    }
 }
 
 static void fatal_error(const char* errstr)

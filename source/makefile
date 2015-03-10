@@ -1,5 +1,5 @@
 
-CC   = g++ -Wall -W -Wextra -ansi -pedantic
+CC   = g++ -Wall -W -Wextra -ansi -pedantic -std=c++11
 # LIBS = ""
 
 
@@ -10,11 +10,11 @@ clean:
 
 
 # executables
-server: server.o net_helper.o
-	$(CC) -o ./server.out server.o net_helper.o
+server: server.o net_helper.o select_helper.o
+	$(CC) -o ./server.out server.o net_helper.o select_helper.o
 
 client: client.o net_helper.o
-	$(CC) $(LIBS) -o ./client.out client.o net_helper.o
+	$(CC) -o ./client.out client.o net_helper.o
 
 
 
@@ -30,3 +30,9 @@ client.o: client.c client.h
 # common helper modules
 net_helper.o: net_helper.c net_helper.h
 	$(CC) -c net_helper.c
+
+
+
+# server helper modules
+select_helper.o: select_helper.c select_helper.h
+	$(CC) -c select_helper.c
