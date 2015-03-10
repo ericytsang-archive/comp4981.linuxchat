@@ -7,6 +7,8 @@
 #include "net_helper.h"
 #include "select_helper.h"
 
+#define STDIN 0
+
 // globals for getopt
 extern char *optarg;
 extern int optind;
@@ -20,12 +22,14 @@ typedef struct
 Arguments;
 
 static void fatal_error(const char* errstr);
-static void get_cmd_ln_args(Arguments* args, int argc, char** argv);
+static void get_cmd_ln_args(Arguments* args,int argc, char** argv);
 static void server_loop(int serverSocket, int fileDescriptor);
-static void handle_serversocket_activity(int serverSocket, Files* files,
-    std::map<int, ClientInfo>* clients);
-static void handle_socket_activity(int selectedSocket, int fileDescriptor,
+static void handle_serversocket_activity(int fileDescriptor, int serverSocket,
     Files* files, std::map<int, ClientInfo>* clients);
+static void handle_socket_activity(int fileDescriptor, int selectedSocket,
+    Files* files, std::map<int, ClientInfo>* clients);
+static void handle_message(int socket, std::map<int, ClientInfo>* clients,
+    Message msg);
 
 int main (int argc, char** argv)
 {
@@ -68,7 +72,8 @@ static void server_loop(int serverSocket, int fileDescriptor)
     files_init(&files);
 
     // add the server socket to the select set
-    files_add_file(&files, serverSocket);
+    files_add_file(&files,serverSocket);
+    files_add_file(&files,STDIN);
 
     while(true)
     {
@@ -82,8 +87,15 @@ static void server_loop(int serverSocket, int fileDescriptor)
         // socket set, & client list
         if(FD_ISSET(serverSocket,&files.selectFds))
         {
-            handle_serversocket_activity(serverSocket,&files,&clients);
+            handle_serversocket_activity(fileDescriptor,serverSocket,&files,
+                &clients);
             continue;
+        }
+
+        // if from stdin, exit the loop
+        if(FD_ISSET(STDIN,&files.selectFds))
+        {
+            break;
         }
 
         // loop through client sockets, and handle events on them
@@ -92,22 +104,20 @@ static void server_loop(int serverSocket, int fileDescriptor)
         {
             int selectedSocket = *socketIt;
 
-            // if there is no activity on the socket, or socket is server
-            // socket, go do the next socket
-            if(selectedSocket == serverSocket
-                || !FD_ISSET(selectedSocket,&files.selectFds))
+            // if this is a client socket, and it has activity, go deal with it
+            if(FD_ISSET(selectedSocket,&files.selectFds)
+                && selectedSocket != serverSocket
+                && selectedSocket != STDIN)
             {
-                continue;
+                handle_socket_activity(fileDescriptor,selectedSocket,&files,
+                    &clients);
             }
-
-            handle_socket_activity(selectedSocket,fileDescriptor,&files,
-                &clients);
         }
     }
 }
 
-static void handle_serversocket_activity(int serverSocket, Files* files,
-    std::map<int, ClientInfo>* clients)
+static void handle_serversocket_activity(int fileDescriptor, int serverSocket,
+    Files* files, std::map<int, ClientInfo>* clients)
 {
     char output[1024];
 
@@ -121,31 +131,23 @@ static void handle_serversocket_activity(int serverSocket, Files* files,
     (*clients)[newSocket] = newClient;
 
     // write to file and stdout
-    sprintf(output,"socket %d connected\n",selectedSocket);
+    sprintf(output,"socket %d connected\n",newSocket);
     write(fileDescriptor,output,strlen(output));
     printf("%s",output);
 }
 
-static void handle_socket_activity(int selectedSocket, int fileDescriptor,
+static void handle_socket_activity(int fileDescriptor, int selectedSocket,
     Files* files, std::map<int, ClientInfo>* clients)
 {
-    int bytesToRead;
-    int bytesRead;
-    char* bufferPointer;
+    int result;
     Message msg;
     char output[1024];
 
     // read message from socket
-    bufferPointer = (char*) &msg;
-    bytesToRead = sizeof(Message);
-    while ((bytesRead = read(selectedSocket,bufferPointer,bytesToRead)) > 0)
-    {
-        bufferPointer += bytesRead;
-        bytesToRead -= bytesRead;
-    }
+    result = read_socket(selectedSocket,&msg,sizeof(msg));
 
     // handle socket read result
-    switch(bytesRead)
+    switch(result)
     {
     case -1:
     case 0:
@@ -160,7 +162,7 @@ static void handle_socket_activity(int selectedSocket, int fileDescriptor,
         printf("%s",output);
         break;
     default:
-        send(selectedSocket,"output", strlen("output"), 0);
+        handle_message(selectedSocket,clients,msg);
         // if(/*control message*/)
         // {
         //     // add connection to socket list
@@ -168,14 +170,28 @@ static void handle_socket_activity(int selectedSocket, int fileDescriptor,
         // }
         // else
         // {
-        //     // send_to_all_except(/*read data*/, /*sending socket*/);
+        //     // send_to_all_except(/*read data*/,/*sending socket*/);
         //     // write update to file
         // }
         break;
     }
 }
 
-static void get_cmd_ln_args(Arguments* args, int argc, char** argv)
+static void handle_message(int socket, std::map<int, ClientInfo>* clients,
+    Message msg)
+{
+    switch(msg.type)
+    {
+    case MSG_T_CHAT:
+        printf("%s",msg.data.message);
+        break;
+    default:
+        fprintf(stdout,"unknown message type received:%d\n",msg.type);
+        break;
+    }
+}
+
+static void get_cmd_ln_args(Arguments* args,int argc, char** argv)
 {
     char optstring[] = "p:f:";
     int ret;
@@ -185,14 +201,14 @@ static void get_cmd_ln_args(Arguments* args, int argc, char** argv)
     sprintf(usage,"usage: %s -p [port_number] -f [file_path]\n",argv[0]);
 
     // parse command line arguments
-    while ((ret = getopt (argc, argv, optstring)) != -1)
+    while ((ret = getopt (argc,argv,optstring)) != -1)
     {
         switch (ret)
         {
-        case 'p':
+        case 'p':       // get port number
             if(!args->port)
             {
-                printf("starting server on port number: %s\n", optarg);
+                printf("starting server on port number: %s\n",optarg);
                 args->port = atoi(optarg);
             }
             else
@@ -200,10 +216,10 @@ static void get_cmd_ln_args(Arguments* args, int argc, char** argv)
                 fatal_error(usage);
             }
             break;
-        case 'f':
+        case 'f':       // get file path
             if(!args->filePath)
             {
-                printf("opening file for append: %s\n", optarg);
+                printf("opening file for append: %s\n",optarg);
                 args->filePath = optarg;
             }
             else
@@ -212,7 +228,7 @@ static void get_cmd_ln_args(Arguments* args, int argc, char** argv)
             }
             break;
         case '?':
-            printf("unrecognized switch: %s\n", optarg);
+            printf("unrecognized switch: %s\n",optarg);
             break;
         }
     }

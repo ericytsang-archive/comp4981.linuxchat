@@ -1,115 +1,230 @@
-/*---------------------------------------------------------------------------------------
---  SOURCE FILE:        tcp_clnt.c - A simple TCP client program.
---
---  PROGRAM:        tclnt.exe
---
---  FUNCTIONS:      Berkeley Socket API
---
---  DATE:           February 2, 2008
---
---  REVISIONS:      (Date and Description)
---              January 2005
---              Modified the read loop to use fgets.
---              While loop is based on the buffer length
---
---
---  DESIGNERS:      Aman Abdulla
---
---  PROGRAMMERS:        Aman Abdulla
---
---  NOTES:
---  The program will establish a TCP connection to a user specifed server.
--- The server can be specified using a fully qualified domain name or and
---  IP address. After the connection has been established the user will be
--- prompted for date. The date string is then sent to the server and the
--- response (echo) back from the server is displayed.
----------------------------------------------------------------------------------------*/
 #include <stdio.h>
-#include <netdb.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <strings.h>
-#include <arpa/inet.h>
 #include <unistd.h>
+#include <getopt.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <map>
 #include "net_helper.h"
+#include "select_helper.h"
 
-#define SERVER_TCP_PORT     7000    // Default port
-#define BUFLEN          80      // Buffer length
+#define STDIN 0
 
-int main (int argc, char **argv)
+typedef struct
 {
-    int n, bytes_to_read;
-    int sd, port;
-    struct hostent  *hp;
-    struct sockaddr_in server;
-    char  *host, *bp, rbuf[BUFLEN], sbuf[BUFLEN], **pptr;
-    char str[16];
+    char* remoteAddr;
+    short port;
+    char* displayName;
+    char* filePath;
+}
+Arguments;
 
-    switch(argc)
+static void get_cmd_ln_args(Arguments* args, int argc, char** argv);
+static void client_loop(int socket, int file);
+static void handle_stream_activity(int socket, int file);
+static void handle_socket_activity(int socket, int file);
+static void handle_message(Message msg);
+static void fatal_error(const char* errstr);
+
+int main (int argc, char** argv)
+{
+    int socket;
+    int file;
+    Arguments args;
+    memset(&args,0,sizeof(args));
+
+    // get command line arguments
+    get_cmd_ln_args(&args, argc, argv);
+
+    // open file to record chat history to
+    if((file = open(args.filePath, 0)) < 0)
     {
-        case 2:
-            host =  argv[1];    // Host name
-            port =  SERVER_TCP_PORT;
-        break;
-        case 3:
-            host =  argv[1];
-            port =  atoi(argv[2]);  // User specified port
-        break;
-        default:
-            fprintf(stderr, "Usage: %s host [port]\n", argv[0]);
-            exit(1);
+        fatal_error("failed to open the file");
     }
 
-    // // Create the socket
-    // if ((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-    // {
-    //  perror("Cannot create socket");
-    //  exit(1);
-    // }
-    // bzero((char *)&server, sizeof(struct sockaddr_in));
-    // server.sin_family = AF_INET;
-    // server.sin_port = htons(port);
-    // if ((hp = gethostbyname(host)) == NULL)
-    // {
-    //  fprintf(stderr, "Unknown server address\n");
-    //  exit(1);
-    // }
-    // bcopy(hp->h_addr, (char *)&server.sin_addr, hp->h_length);
+    // open the server socket
+    socket = make_tcp_client_socket(args.remoteAddr,0,args.port,0);
 
-    // // Connecting to the server
-    // if (connect (sd, (struct sockaddr *)&server, sizeof(server)) == -1)
-    // {
-    //  fprintf(stderr, "Can't connect to server\n");
-    //  perror("connect");
-    //  exit(1);
-    // }
-    // printf("Connected:    Server Name: %s\n", hp->h_name);
-    // pptr = hp->h_addr_list;
-    // printf("\t\tIP Address: %s\n", inet_ntop(hp->h_addrtype, *pptr, str, sizeof(str)));
-    sd = make_tcp_client_socket(host, 0, port, 0);
-    printf("Transmit:\n");
-    //gets(sbuf); // get user's text
-    fgets (sbuf, BUFLEN, stdin);
+    // do the server loop
+    client_loop(socket,file);
 
-    // Transmit data through the socket
-    send (sd, sbuf, BUFLEN, 0);
+    // close the server socket
+    close(socket);
 
-    printf("Receive:\n");
-    bp = rbuf;
-    bytes_to_read = BUFLEN;
+    // close the file
+    close(file);
 
-    // client makes repeated calls to recv until no more data is expected to arrive.
-    n = 0;
-    /*while ((n = */recv (sd, bp, bytes_to_read, 0);/*) < BUFLEN)*/
-    /*{
-        bp += n;
-        bytes_to_read -= n;
-    }*/
-    printf ("%s\n", rbuf);
-    fflush(stdout);
-    close (sd);
-    return (0);
+    return 0;
+}
+
+static void get_cmd_ln_args(Arguments* args, int argc, char** argv)
+{
+    char optstring[] = "p:f:d:a:";
+    int ret;
+    char usage[1000];
+
+    // create usage string
+    sprintf(usage,"usage: %s -p [port_number] -f [file_path] -a "
+        "[remote_address] -d [display_name]\n",argv[0]);
+
+    // parse command line arguments
+    while ((ret = getopt (argc,argv,optstring)) != -1)
+    {
+        switch (ret)
+        {
+        case 'p':       // get port number
+            if(!args->port)
+            {
+                printf("starting server on port number: %s\n",optarg);
+                args->port = atoi(optarg);
+            }
+            else
+            {
+                fatal_error(usage);
+            }
+            break;
+        case 'f':       // get file path
+            if(!args->filePath)
+            {
+                printf("opening file for append: %s\n",optarg);
+                args->filePath = optarg;
+            }
+            else
+            {
+                fatal_error(usage);
+            }
+            break;
+        case 'd':       // get client's display name
+            if(!args->displayName)
+            {
+                printf("display name set: %s\n",optarg);
+                args->displayName = optarg;
+            }
+            else
+            {
+                fatal_error(usage);
+            }
+            break;
+        case 'a':       // remote IP address
+            if(!args->remoteAddr)
+            {
+                printf("remote host name: %s\n",optarg);
+                args->remoteAddr = optarg;
+            }
+            else
+            {
+                fatal_error(usage);
+            }
+            break;
+        case '?':
+            printf("unrecognized switch: %s\n",optarg);
+            break;
+        }
+    }
+
+    // error if command line arguments aren't correct
+    if (optind < argc
+        || args->remoteAddr == 0
+        || args->port == 0
+        || args->displayName == 0
+        || args->filePath == 0)
+    {
+        fatal_error(usage);
+    }
+}
+
+static void client_loop(int socket, int file)
+{
+    Files files;
+    files_init(&files);
+
+    files_add_file(&files,STDIN);
+    files_add_file(&files,socket);
+
+    while(true)
+    {
+        // wait for an event on any socket to occur
+        if(files_select(&files) == -1)
+        {
+            fatal_error("failed on select");
+        }
+
+        // if stream has activity, deal with it
+        if(FD_ISSET(STDIN,&files.selectFds))
+        {
+            handle_stream_activity(socket,file);
+        }
+
+        // if socket has activity, deal with it
+        if(FD_ISSET(socket,&files.selectFds))
+        {
+            handle_socket_activity(socket,file);
+        }
+    }
+}
+
+static void handle_stream_activity(int socket, int file)
+{
+    Message msg;    // message structure sent out socket
+    char string[MSG_BUF_LEN];  // holds characters read from standard input
+
+    // send stuff from standard input out the socket until it's empty
+    do
+    {
+        // read from stdin
+        memset(string,0,MSG_BUF_LEN);
+        fgets(string,MSG_BUF_LEN,stdin);
+
+        // set up the message structure
+        msg.type = MSG_T_CHAT;
+        memcpy(msg.data.message,string,MSG_BUF_LEN);
+
+        // send the message through the socket
+        send(socket,&msg,sizeof(msg),0);
+
+        // record the message to the file
+        write(file,string,strlen(string));
+    }
+    while(string[strlen(string)-1] != '\n');
+}
+
+static void handle_socket_activity(int socket, int file)
+{
+    int result;     // result of reading from the socket
+    Message msg;    // message structure sent out socket
+    char string[MSG_BUF_LEN];  // holds characters read from standard input
+
+    // read from socket
+    result = read_socket(socket,&msg,sizeof(msg));
+
+    // handle read result
+    switch(result)
+    {
+    case -1:    // socket error
+    case 0:     // socket eof
+        exit(0);
+        break;
+    default:    // socket read
+        handle_message(msg);
+        break;
+    }
+}
+
+static void handle_message(Message msg)
+{
+    // parse message structure
+    switch(msg.type)
+    {
+    case MSG_T_CHAT:
+        printf("%s",msg.data.message);
+        break;
+    default:
+        fprintf(stdout,"unknown message type received:%d\n",msg.type);
+        break;
+    }
+}
+
+static void fatal_error(const char* errstr)
+{
+    perror(errstr);
+    exit(errno);
 }

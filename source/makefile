@@ -13,8 +13,8 @@ clean:
 server: server.o net_helper.o select_helper.o
 	$(CC) -o ./server.out server.o net_helper.o select_helper.o
 
-client: client.o net_helper.o
-	$(CC) -o ./client.out client.o net_helper.o
+client: client.o net_helper.o select_helper.o
+	$(CC) -o ./client.out client.o net_helper.o select_helper.o
 
 
 
