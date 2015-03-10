@@ -22,6 +22,10 @@ Arguments;
 static void fatal_error(const char* errstr);
 static void get_cmd_ln_args(Arguments* args, int argc, char** argv);
 static void server_loop(int serverSocket, int fileDescriptor);
+static void handle_serversocket_activity(int serverSocket, Files* files,
+    std::map<int, ClientInfo>* clients);
+static void handle_socket_activity(int selectedSocket, int fileDescriptor,
+    Files* files, std::map<int, ClientInfo>* clients);
 
 int main (int argc, char** argv)
 {
@@ -73,74 +77,95 @@ static void server_loop(int serverSocket, int fileDescriptor)
             fatal_error("failed on select");
         }
 
-        if(FD_ISSET(serverSocket, &files.selectFds))
+        // if server socket has activity, accept the connection, add it to
+        // socket set, & client list
+        if(FD_ISSET(serverSocket,&files.selectFds))
         {
-            // accept the connection, add it to socket set, & client list
-            int newSocket = accept(serverSocket, 0, 0);
-            files_add_file(&files, newSocket);
-            ClientInfo newClient;
-            clients[newSocket] = newClient;
+            handle_serversocket_activity(serverSocket,&files,&clients);
             continue;
         }
 
+        // loop through client sockets, and handle events on them
         for(auto socketIt = files.fdSet.begin(); socketIt != files.fdSet.end();
             ++socketIt)
         {
             int selectedSocket = *socketIt;
-            ClientInfo* client = &clients[selectedSocket];
-            char output[1024];
-            int bytesToRead;
-            int bytesRead;
-            char* bufferPointer;
-            Message msg;
 
+            // if there is no activity on the socket, or socket is server
+            // socket, go do the next socket
             if(selectedSocket == serverSocket
-                || !FD_ISSET(selectedSocket, &files.selectFds))
+                || !FD_ISSET(selectedSocket,&files.selectFds))
             {
                 continue;
             }
 
-            // read message from socket
-            bufferPointer = (char*) &msg;
-            bytesToRead = sizeof(Message);
-            while ((bytesRead = read(selectedSocket, bufferPointer, bytesToRead)) > 0)
-            {
-                bufferPointer += bytesRead;
-                bytesToRead -= bytesRead;
-            }
-
-            // handle socket read result
-            switch(bytesRead)
-            {
-            case -1:
-            case 0:
-                // remove the socket from socket set and socket list
-                files_rm_file(&files, selectedSocket);
-                clients.erase(selectedSocket);
-
-                // write update to file
-                sprintf(output, "socket %d disconnected\n", selectedSocket);
-                write(fileDescriptor, output, strlen(output));
-                printf("%s", output);
-
-                // close the socket
-                close(selectedSocket);
-                break;
-            default:
-                send(selectedSocket, "output", strlen("output"), 0);
-                // if(/*control message*/)
-                // {
-                //     // add connection to socket list
-                //     // write update to file
-                // }
-                // else
-                // {
-                //     // send_to_all_except(/*read data*/, /*sending socket*/);
-                //     // write update to file
-                // }
-                break;
-            }
+            handle_socket_activity(selectedSocket,fileDescriptor,&files,
+                &clients);
         }
+    }
+}
+
+static void handle_serversocket_activity(int serverSocket, Files* files,
+    std::map<int, ClientInfo>* clients)
+{
+    // accept the new connection
+    int newSocket = accept(serverSocket,0,0);
+    files_add_file(files,newSocket);
+
+    // create new ClientInto structure to keep track of state information
+    // associated with new connection
+    ClientInfo newClient;
+    (*clients)[newSocket] = newClient;
+}
+
+static void handle_socket_activity(int selectedSocket, int fileDescriptor,
+    Files* files, std::map<int, ClientInfo>* clients)
+{
+    int bytesToRead;
+    int bytesRead;
+    char* bufferPointer;
+    Message msg;
+    char output[1024];
+
+    // read message from socket
+    bufferPointer = (char*) &msg;
+    bytesToRead = sizeof(Message);
+    while ((bytesRead = read(selectedSocket,bufferPointer,bytesToRead)) > 0)
+    {
+        bufferPointer += bytesRead;
+        bytesToRead -= bytesRead;
+    }
+
+    // handle socket read result
+    switch(bytesRead)
+    {
+    case -1:
+    case 0:
+        // remove the socket from socket set and socket list
+        files_rm_file(files,selectedSocket);
+        clients->erase(selectedSocket);
+
+        // write update to file
+        sprintf(output,"socket %d disconnected\n",selectedSocket);
+        write(fileDescriptor,output,strlen(output));
+        printf("%s",output);
+
+        // close the socket
+        close(selectedSocket);
+        break;
+    default:
+        send(selectedSocket,"output", strlen("output"), 0);
+        // if(/*control message*/)
+        // {
+        //     // add connection to socket list
+        //     // write update to file
+        // }
+        // else
+        // {
+        //     // send_to_all_except(/*read data*/, /*sending socket*/);
+        //     // write update to file
+        // }
+        break;
     }
 }
 
@@ -148,7 +173,12 @@ static void get_cmd_ln_args(Arguments* args, int argc, char** argv)
 {
     char optstring[] = "p:f:";
     int ret;
+    char usage[1000];
 
+    // create usage string
+    sprintf(usage,"usage: %s -p [port_number] -f [file_path]\n",argv[0]);
+
+    // parse command line arguments
     while ((ret = getopt (argc, argv, optstring)) != -1)
     {
         switch (ret)
@@ -161,7 +191,7 @@ static void get_cmd_ln_args(Arguments* args, int argc, char** argv)
             }
             else
             {
-                fatal_error("failed to parse command line arguments");
+                fatal_error(usage);
             }
             break;
         case 'f':
@@ -172,7 +202,7 @@ static void get_cmd_ln_args(Arguments* args, int argc, char** argv)
             }
             else
             {
-                fatal_error("failed to parse command line arguments");
+                fatal_error(usage);
             }
             break;
         case '?':
@@ -181,9 +211,10 @@ static void get_cmd_ln_args(Arguments* args, int argc, char** argv)
         }
     }
 
-    if (optind < argc)
+    // error if command line arguments aren't correct
+    if (optind < argc || args->port == 0 || args->filePath == 0)
     {
-        fatal_error("failed to parse command line arguments");
+        fatal_error(usage);
     }
 }
 
