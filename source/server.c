@@ -67,6 +67,7 @@ static void server_loop(int serverSocket, int fileDescriptor)
     Files files;
     files_init(&files);
 
+    // add the server socket to the select set
     files_add_file(&files, serverSocket);
 
     while(true)
@@ -108,6 +109,8 @@ static void server_loop(int serverSocket, int fileDescriptor)
 static void handle_serversocket_activity(int serverSocket, Files* files,
     std::map<int, ClientInfo>* clients)
 {
+    char output[1024];
+
     // accept the new connection
     int newSocket = accept(serverSocket,0,0);
     files_add_file(files,newSocket);
@@ -116,6 +119,11 @@ static void handle_serversocket_activity(int serverSocket, Files* files,
     // associated with new connection
     ClientInfo newClient;
     (*clients)[newSocket] = newClient;
+
+    // write to file and stdout
+    sprintf(output,"socket %d connected\n",selectedSocket);
+    write(fileDescriptor,output,strlen(output));
+    printf("%s",output);
 }
 
 static void handle_socket_activity(int selectedSocket, int fileDescriptor,
@@ -141,17 +149,15 @@ static void handle_socket_activity(int selectedSocket, int fileDescriptor,
     {
     case -1:
     case 0:
-        // remove the socket from socket set and socket list
+        // remove the socket from the select set and socket list, and close it
         files_rm_file(files,selectedSocket);
+        close(selectedSocket);
         clients->erase(selectedSocket);
 
-        // write update to file
+        // write to file and stdout
         sprintf(output,"socket %d disconnected\n",selectedSocket);
         write(fileDescriptor,output,strlen(output));
         printf("%s",output);
-
-        // close the socket
-        close(selectedSocket);
         break;
     default:
         send(selectedSocket,"output", strlen("output"), 0);
