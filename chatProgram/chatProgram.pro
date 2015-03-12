@@ -1,6 +1,6 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2015-03-07T14:30:19
+# Project created by QtCreator 2015-03-12T10:17:37
 #
 #-------------------------------------------------
 
@@ -23,4 +23,8 @@ FORMS    += mainwindow.ui \
     dialog.ui
 
 RESOURCES += \
+    theIcons.qrc \
     theactions.qrc
+
+OTHER_FILES += \
+    chatProgram.pro.user \
