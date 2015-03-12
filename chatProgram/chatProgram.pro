@@ -1,6 +1,6 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2015-03-07T14:30:19
+# Project created by QtCreator 2015-03-12T10:17:37
 #
 #-------------------------------------------------
 
@@ -13,14 +13,26 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
-    dialog.cpp
+    dialog.cpp \
+    select_helper.cpp \
+    net_helper.cpp \
+    clientwindow.cpp
 
-HEADERS  += mainwindow.h \
-    dialog.h
+HEADERS  += \
+    dialog.h \
+    select_helper.h \
+    net_helper.h \
+    clientwindow.h
 
-FORMS    += mainwindow.ui \
-    dialog.ui
+FORMS    += \
+    dialog.ui \
+    clientwindow.ui
 
 RESOURCES += \
+    theIcons.qrc \
     theactions.qrc
+
+OTHER_FILES += \
+    chatProgram.pro.user \
+
+QMAKE_CXXFLAGS += -std=c++11

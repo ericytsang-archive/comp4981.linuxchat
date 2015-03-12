@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <sys/select.h>
-#include <set>
+#include <QSet>
 
 typedef struct
 {
-    std::set<int> fdSet;
+    QSet<int> fdSet;
     fd_set _selectFds;
     fd_set selectFds;
     int maxFd;      // integer corresponding to the biggest file descriptor
