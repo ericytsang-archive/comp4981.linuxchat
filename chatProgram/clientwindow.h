@@ -2,6 +2,7 @@
 #define CLIENTWINDOW_H
 
 #include <QMainWindow>
+#include <QListWidgetItem>
 
 namespace Ui {
 class MainWindow;
@@ -14,6 +15,9 @@ class ClientWindow : public QMainWindow
 public:
     explicit ClientWindow(QWidget *parent = 0);
     ~ClientWindow();
+    void append_window_text(QString string);
+    void add_user(int key, QString usrName);
+    void rm_user(int key);
 
 private slots:
     void on_actionConnect_triggered();
@@ -26,6 +30,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    QMap<int,QListWidgetItem*> lis;
 };
 
 #endif // CLIENTWINDOW_H
