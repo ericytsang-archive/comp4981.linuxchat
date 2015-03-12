@@ -19,10 +19,10 @@ client: client.o net_helper.o select_helper.o
 
 
 # main modules
-server.o: server.c server.h
+server.o: server.c
 	$(CC) -c server.c
 
-client.o: client.c client.h
+client.o: client.c
 	$(CC) -c client.c
 
 

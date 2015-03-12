@@ -31,37 +31,37 @@ static void handle_message(int socket, std::map<int, ClientInfo>* clients,
     Message msg);
 static void fatal_error(const char* errstr);
 
-//int main (int argc, char** argv)
-//{
-//    int serverSocket;
-//    int fileDescriptor;
-//    Arguments args;
-//    args.port = 0;
-//    args.filePath = 0;
+int main (int argc, char** argv)
+{
+   int serverSocket;
+   int fileDescriptor;
+   Arguments args;
+   args.port = 0;
+   args.filePath = 0;
 
-//    // get command line arguments
-//    get_cmd_ln_args(&args, argc, argv);
+   // get command line arguments
+   get_cmd_ln_args(&args, argc, argv);
 
-//    // open file to record chat history to
-//    if((fileDescriptor = open(args.filePath, 0)) < 0)
-//    {
-//        fatal_error("failed to open the file");
-//    }
+   // open file to record chat history to
+   if((fileDescriptor = open(args.filePath, 0)) < 0)
+   {
+       fatal_error("failed to open the file");
+   }
 
-//    // open the server socket
-//    serverSocket = make_tcp_server_socket(args.port);
+   // open the server socket
+   serverSocket = make_tcp_server_socket(args.port);
 
-//    // do the server loop
-//    server_loop(serverSocket, fileDescriptor);
+   // do the server loop
+   server_loop(serverSocket, fileDescriptor);
 
-//    // close the server socket
-//    close(serverSocket);
+   // close the server socket
+   close(serverSocket);
 
-//    // close the file
-//    close(fileDescriptor);
+   // close the file
+   close(fileDescriptor);
 
-//    return 0;
-//}
+   return 0;
+}
 
 /**
  * parses command line arguments from argc, and argv into the args structure.

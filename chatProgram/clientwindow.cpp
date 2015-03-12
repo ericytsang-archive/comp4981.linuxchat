@@ -19,27 +19,36 @@ ClientWindow::ClientWindow(QWidget *parent) :
     /* Initial Settings */
     ui->actionDisconnect->setEnabled(false);
 
-
-    //testing only ~ have to move this later on
-
-     ui->listWidget->addItem("Eric");
-     ui->listWidget->setStyleSheet( "QListWidget::item { border-bottom: 1px solid red; }" );
-
-    /* Populates the list widget  */
-    for(int i= 1; i < 10; i++)
-    {
-
-        ui->listWidget->addItem("waifu number " + QString::number(i));
-        if (i == 1)
-            ui->listWidget->setCurrentRow(0);
-    }
-
-
+    add_user(1,"heyy1");
+    add_user(2,"heyy2");
+    add_user(3,"heyy3");
+    add_user(4,"heyy4");
+    add_user(5,"heyy5");
+    rm_user(3);
 }
 
 ClientWindow::~ClientWindow()
 {
     delete ui;
+}
+
+void ClientWindow::append_window_text(QString string)
+{
+    ui->textBrowser->append(string);
+}
+
+void ClientWindow::add_user(int key, QString usrName)
+{
+    QListWidgetItem* li = new QListWidgetItem(usrName);
+    lis.insert(key,li);
+    ui->listWidget->addItem(li);
+}
+
+void ClientWindow::rm_user(int key)
+{
+    ui->listWidget->removeItemWidget(lis[key]);
+    delete lis[key];
+    lis.remove(key);
 }
 
 void ClientWindow::on_actionConnect_triggered()
