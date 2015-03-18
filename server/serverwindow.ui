@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ServerWindow</class>
+ <widget class="QMainWindow" name="ServerWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>883</width>
+    <height>597</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <widget class="QTextBrowser" name="textBrowser">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>20</y>
+      <width>671</width>
+      <height>501</height>
+     </rect>
+    </property>
+    <property name="placeholderText">
+     <string>chat will be displayed here</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>20</y>
+      <width>131</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>11</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Users Online:</string>
+    </property>
+   </widget>
+   <widget class="QListWidget" name="listWidget">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>50</y>
+      <width>151</width>
+      <height>471</height>
+     </rect>
+    </property>
+    <property name="selectionMode">
+     <enum>QAbstractItemView::NoSelection</enum>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionConnect"/>
+   <addaction name="actionDisconnect"/>
+   <addaction name="actionSettings"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>883</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuBanana">
+    <property name="title">
+     <string>Options</string>
+    </property>
+    <addaction name="separator"/>
+    <addaction name="actionConnect"/>
+    <addaction name="actionDisconnect"/>
+    <addaction name="actionSettings"/>
+   </widget>
+   <addaction name="menuBanana"/>
+  </widget>
+  <action name="actionConnect">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="theicons.qrc">
+     <normaloff>:/theIcon/theIcon/anohana_wallpaper_by_slydog0905-d4d02e7.png</normaloff>:/theIcon/theIcon/anohana_wallpaper_by_slydog0905-d4d02e7.png</iconset>
+   </property>
+   <property name="text">
+    <string>Connect</string>
+   </property>
+  </action>
+  <action name="actionDisconnect">
+   <property name="icon">
+    <iconset resource="theicons.qrc">
+     <normaloff>:/theIcon/theIcon/bad_piggy_by_mikeinel-d5lz778.jpg</normaloff>:/theIcon/theIcon/bad_piggy_by_mikeinel-d5lz778.jpg</iconset>
+   </property>
+   <property name="text">
+    <string>Disconnect</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="icon">
+    <iconset resource="theicons.qrc">
+     <normaloff>:/theIcon/theIcon/sandshrew_wallpaper_by_dragonsdenda-d5zmlri.jpg</normaloff>:/theIcon/theIcon/sandshrew_wallpaper_by_dragonsdenda-d5zmlri.jpg</iconset>
+   </property>
+   <property name="text">
+    <string>Settings</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources>
+  <include location="theicons.qrc"/>
+ </resources>
+ <connections/>
+</ui>

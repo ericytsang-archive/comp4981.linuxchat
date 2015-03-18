@@ -7,6 +7,11 @@ QString tempName = "";
 QString tempIP = "";
 QString tempFilePath = "";
 
+int prevPort = 80;
+QString prevName = "";
+QString prevIP = "";
+QString prevFilePath = "";
+
 Dialog::Dialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Dialog)
@@ -50,4 +55,12 @@ void Dialog::on_buttonBox_accepted()
     theResults.ip = tempIP;
     theResults.port = tempPort;
     theResults.filePath = tempFilePath;
+}
+
+void Dialog::on_buttonBox_rejected()
+{
+    theResults.port = prevPort;
+    theResults.filePath = prevFilePath;
+    theResults.name = prevName;
+    theResults.ip = prevIP;
 }

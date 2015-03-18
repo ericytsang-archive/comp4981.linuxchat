@@ -1,17 +1,17 @@
-#include "clientwindow.h"
-#include "ui_clientwindow.h"
+#include "serverwindow.h"
+#include "ui_serverwindow.h"
 #include "dialog.h"
 #include <qmessagebox.h>
 
 
+
 int port = 80;
-QString ip = "localhost";
-QString name = "waifu00";
 QString filePath = "/";
 
-ClientWindow::ClientWindow(QWidget *parent) :
+
+ServerWindow::ServerWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::ServerWindow)
 {
     ui->setupUi(this);
 
@@ -27,31 +27,33 @@ ClientWindow::ClientWindow(QWidget *parent) :
     rm_user(3);
 }
 
-ClientWindow::~ClientWindow()
+ServerWindow::~ServerWindow()
 {
     delete ui;
 }
 
-void ClientWindow::append_window_text(QString string)
+
+
+void ServerWindow::append_window_text(QString string)
 {
     ui->textBrowser->append(string);
 }
 
-void ClientWindow::add_user(int key, QString usrName)
+void ServerWindow::add_user(int key, QString usrName)
 {
     QListWidgetItem* li = new QListWidgetItem(usrName);
     lis.insert(key,li);
     ui->listWidget->addItem(li);
 }
 
-void ClientWindow::rm_user(int key)
+void ServerWindow::rm_user(int key)
 {
     ui->listWidget->removeItemWidget(lis[key]);
     delete lis[key];
     lis.remove(key);
 }
 
-void ClientWindow::on_actionConnect_triggered()
+void ServerWindow::on_actionConnect_triggered()
 {
     if (!ui->actionConnect->isChecked()){
         ui->actionDisconnect->setEnabled(false);
@@ -62,7 +64,7 @@ void ClientWindow::on_actionConnect_triggered()
     }
 }
 
-void ClientWindow::on_actionDisconnect_triggered()
+void ServerWindow::on_actionDisconnect_triggered()
 {
     ui->actionConnect->setChecked(false);
     ui->actionDisconnect->setEnabled(false);
@@ -70,21 +72,18 @@ void ClientWindow::on_actionDisconnect_triggered()
 
 }
 
-void ClientWindow::on_actionSettings_triggered()
+void ServerWindow::on_actionSettings_triggered()
 {
-
 
     /* PopUp message before the settings*/
     QMessageBox pop;
-     pop.setText("Display port: " + QString::number(port) + "\nIP: " + ip +"\nName: " + name +"\nFile Path: " + filePath);
+    pop.setText("Display port: " + QString::number(port) + "\nFile Path: " + filePath);
     pop.exec();
 
     Dialog settings(this);
     Results savedResults;
     savedResults.port = port;
     savedResults.filePath = filePath;
-    savedResults.ip = ip;
-    savedResults.name = name;
 
     settings.setData(savedResults);
     settings.exec();
@@ -92,20 +91,10 @@ void ClientWindow::on_actionSettings_triggered()
     Results passed = settings.getResults();
 
     port = passed.port;
-    ip = passed.ip;
-    name = passed.name;
     filePath = passed.filePath;
 
+
     /* PopUp message after the settings*/
-    pop.setText("Display port: " + QString::number(port) + "\nIP: " + ip +"\nName: " + name +"\nFile Path: " + filePath);
+    pop.setText("Display port: " + QString::number(port) + "\nFile Path: " + filePath);
     pop.exec();
-
-
-}
-
-void ClientWindow::on_pushButton_clicked()
-{
-
-    ui->textBrowser->append(ui->textEdit->toPlainText());
-    ui->textEdit->setText("");
 }
