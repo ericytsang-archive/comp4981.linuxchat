@@ -1,7 +1,7 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
-namespace Networking
+namespace Net
 {
 
     struct Message

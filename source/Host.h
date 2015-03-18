@@ -22,7 +22,7 @@
  */
 #define SOCKET_OP_FAIL 2
 
-namespace Networking
+namespace Net
 {
     struct Message;
 

@@ -2,7 +2,7 @@
 
 #include "Host.h"
 
-using namespace Networking;
+using namespace Net;
 
 int main(void)
 {

@@ -19,7 +19,7 @@
 
 // #define DEBUG
 
-using namespace Networking;
+using namespace Net;
 
 // forward declarations
 static void fatal_error(const char* errstr);

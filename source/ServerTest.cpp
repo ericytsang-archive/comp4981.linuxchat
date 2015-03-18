@@ -7,11 +7,9 @@
 #include <unistd.h>
 #include <pthread.h>
 
-using namespace Networking;
+Net::Message msg;
 
-Message msg;
-
-class TestHost : public Host
+class TestHost : public Net::Host
 {
 public:
     TestHost()
@@ -23,12 +21,6 @@ public:
         printf("sending message\n");
         send(socket,msg);
     }
-    // virtual void onMessage(int socket, Message msg)
-    // {
-    // }
-    // virtual void onDisconnect(int socket, int remote)
-    // {
-    // }
 private:
 };
 
