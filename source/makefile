@@ -1,38 +1,39 @@
 
-CC   = g++ -Wall -W -Wextra -ansi -pedantic -std=c++11
-# LIBS = ""
+CC = g++ -Wall -W -Wextra -std=c++11
+LIBS = -pthread
 
-
-
+# clean
 clean:
-	rm -f *.o *.out
+	rm *.out *.o
 
 
 
-# executables
-server: server.o net_helper.o select_helper.o
-	$(CC) -o ./server.out server.o net_helper.o select_helper.o
+# client test modules
+ClientTest: ClientTest.o Host.o select_helper.o net_helper.o
+	$(CC) $(LIBS) -o ./ClientTest.out ClientTest.o Host.o select_helper.o net_helper.o
 
-client: client.o net_helper.o select_helper.o
-	$(CC) -o ./client.out client.o net_helper.o select_helper.o
-
-
-
-# main modules
-server.o: server.c
-	$(CC) -c server.c
-
-client.o: client.c
-	$(CC) -c client.c
+ClientTest.o: ClientTest.cpp
+	$(CC) -c ClientTest.cpp
 
 
 
-# common helper modules
-net_helper.o: net_helper.c net_helper.h
-	$(CC) -c net_helper.c
+
+# server test modules
+ServerTest: ServerTest.o Host.o select_helper.o net_helper.o
+	$(CC) $(LIBS) -o ./ServerTest.out ServerTest.o Host.o select_helper.o net_helper.o
+
+ServerTest.o: ServerTest.cpp
+	$(CC) -c ServerTest.cpp
 
 
 
-# server helper modules
-select_helper.o: select_helper.c select_helper.h
-	$(CC) -c select_helper.c
+
+# shared helper modules
+select_helper.o: select_helper.cpp select_helper.h
+	$(CC) -c select_helper.cpp
+
+net_helper.o: net_helper.cpp net_helper.h
+	$(CC) -c net_helper.cpp
+
+Host.o: Host.cpp Host.h
+	$(CC) -c Host.cpp
