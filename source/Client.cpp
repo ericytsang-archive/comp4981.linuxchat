@@ -57,7 +57,7 @@ void Client::sendChatMessage(char* chatMsg)
     Net::Message msg;
     msg.type = SHOW_MSG;
     msg.data = chatMsg;
-    msg.len = strlen(chatMsg);
+    msg.len = strlen(chatMsg)+1;
     send(svrSock,msg);
 }
 
@@ -92,11 +92,17 @@ int main(void)
     chatMsg.data = malloc(chatMsg.len);
     while(fgets((char*)chatMsg.data,chatMsg.len,stdin))
     {
-        if(strcmp((char*)chatMsg.data,"exit\n") == 0)
+        // replace newline character with null, because we don't want to
+        // transmit that
+        ((char*) chatMsg.data)[strlen((char*) chatMsg.data)-1] = 0;
+
+        // if the message is an exit message, terminate the program
+        if(strcmp((char*)chatMsg.data,"exit") == 0)
         {
             break;
         }
 
+        // send the message to the server
         clnt->sendChatMessage((char*)chatMsg.data);
     }
 

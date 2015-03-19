@@ -51,10 +51,21 @@ void ServerWindow::rm_user(int key)
 void ServerWindow::onConnect(int socket)
 {
     char buffer[1024];
-    sprintf(buffer,"socket %d connected\n",socket);
+    sprintf(buffer,"socket %d connected",socket);
     appendText(buffer);
 
+    // tell the new client about all connected clients
+    Net::Message newClntMsg;
+    newClntMsg.type = ADD_CLIENT;
+    for(auto client = lis.begin(); client != lis.end(); ++client)
+    {
+        int currSocket = client.key();
+        QListWidgetItem* currListItem = client.value();
 
+        newClntMsg.data = (void*)currListItem->text().toStdString().c_str();
+        newClntMsg.len  = strlen((char*)newClntMsg.data);
+        send(socket,newClntMsg);
+    }
 }
 
 void ServerWindow::onMessage(int socket, Net::Message msg)
@@ -74,8 +85,23 @@ void ServerWindow::onMessage(int socket, Net::Message msg)
 void ServerWindow::onDisconnect(int socket, int remote)
 {
     char buffer[1024];
-    sprintf(buffer,"socket %d disconnected by %s host\n",socket,remote?"remote":"local");
+    sprintf(buffer,"socket %d disconnected by %s host",socket,remote?"remote":"local");
     appendText(buffer);
+
+    // remove the user from the list
+    rm_user(socket);
+
+    // iterate through remaining users, and tell them who left
+    Net::Message rmClntMsg;
+    rmClntMsg.type = RM_CLIENT;
+    for(auto client = lis.begin(); client != lis.end(); ++client)
+    {
+        int currSocket = client.key();
+
+        rmClntMsg.data = &socket;
+        rmClntMsg.len  = sizeof(socket);
+        send(currSocket,rmClntMsg);
+    }
 }
 
 void ServerWindow::on_actionConnect_triggered()
@@ -128,7 +154,22 @@ void ServerWindow::on_actionSettings_triggered()
 
 void ServerWindow::onShowMessage(int socket, char* cstr)
 {
+    // display the text
     appendText(cstr);
+
+    // forward the received message to all other clients
+    Net::Message msg;
+    msg.type = SHOW_MSG;
+    msg.data = (void*) cstr;
+    msg.len  = strlen(cstr);
+    for(auto client = lis.begin(); client != lis.end(); ++client)
+    {
+        int currSocket = client.key();
+        if(currSocket != socket)
+        {
+            send(currSocket,msg);
+        }
+    }
 }
 
 void ServerWindow::onCheckUserName(int socket, char* cname)
