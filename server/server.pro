@@ -14,10 +14,20 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         serverwindow.cpp \
-    dialog.cpp
+    dialog.cpp \
+    Host.cpp \
+    net_helper.cpp \
+    select_helper.cpp \
+    Server.cpp
 
 HEADERS  += serverwindow.h \
-    dialog.h
+    dialog.h \
+    Host.h \
+    Message.h \
+    net_helper.h \
+    protocol.h \
+    select_helper.h \
+    Server.h
 
 FORMS    += serverwindow.ui \
     dialog.ui
@@ -26,3 +36,5 @@ RESOURCES += \
     theicons.qrc
 
 DISTFILES +=
+
+QMAKE_CXXFLAGS += -std=c++11
