@@ -86,7 +86,7 @@ void ClientWindow::on_actionSettings_triggered()
     savedResults.ip = ip;
     savedResults.name = name;
 
-    settings.setData(savedResults);
+    //settings.setData(savedResults);
     settings.exec();
 
     Results passed = settings.getResults();

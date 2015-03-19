@@ -14,10 +14,13 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
     dialog.cpp \
+    select_helper.cpp \
     clientwindow.cpp
 
 HEADERS  += \
     dialog.h \
+    select_helper.h \
+    net_helper.h \
     clientwindow.h
 
 FORMS    += \

@@ -22,7 +22,7 @@ static const uint qt_meta_data_Dialog[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-       5,   14, // methods
+       6,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -35,6 +35,7 @@ static const uint qt_meta_data_Dialog[] = {
       81,    8,    7,    7, 0x08,
      116,    8,    7,    7, 0x08,
      151,    7,    7,    7, 0x08,
+     175,    7,    7,    7, 0x08,
 
        0        // eod
 };
@@ -44,7 +45,7 @@ static const char qt_meta_stringdata_Dialog[] = {
     "on_lineEdit_2_textChanged(QString)\0"
     "on_lineEdit_3_textChanged(QString)\0"
     "on_lineEdit_4_textChanged(QString)\0"
-    "on_buttonBox_accepted()\0"
+    "on_buttonBox_accepted()\0on_buttonBox_rejected()\0"
 };
 
 void Dialog::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -58,6 +59,7 @@ void Dialog::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void
         case 2: _t->on_lineEdit_3_textChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
         case 3: _t->on_lineEdit_4_textChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
         case 4: _t->on_buttonBox_accepted(); break;
+        case 5: _t->on_buttonBox_rejected(); break;
         default: ;
         }
     }
@@ -95,9 +97,9 @@ int Dialog::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 5)
+        if (_id < 6)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 5;
+        _id -= 6;
     }
     return _id;
 }

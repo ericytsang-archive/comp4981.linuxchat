@@ -131,8 +131,6 @@ public:
         actionDisconnect->setText(QApplication::translate("MainWindow", "Disconnect", 0, QApplication::UnicodeUTF8));
         actionSettings->setText(QApplication::translate("MainWindow", "Settings", 0, QApplication::UnicodeUTF8));
         pushButton->setText(QApplication::translate("MainWindow", "Send", 0, QApplication::UnicodeUTF8));
-        textBrowser->setPlaceholderText(QApplication::translate("MainWindow", "chat will be displayed here", 0, QApplication::UnicodeUTF8));
-        textEdit->setPlaceholderText(QApplication::translate("MainWindow", "type message to send here", 0, QApplication::UnicodeUTF8));
         label->setText(QApplication::translate("MainWindow", "Users Online:", 0, QApplication::UnicodeUTF8));
         menuBanana->setTitle(QApplication::translate("MainWindow", "Options", 0, QApplication::UnicodeUTF8));
     } // retranslateUi
