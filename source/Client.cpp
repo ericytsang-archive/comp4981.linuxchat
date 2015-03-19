@@ -22,7 +22,7 @@ void Client::onConnect(int socket)
     Net::Message msg;
     msg.type = CHECK_USR_NAME;
     msg.data = name;
-    msg.len = strlen(name);
+    msg.len = strlen(name)+1;
     send(socket,msg);
     svrSock = socket;
 }
