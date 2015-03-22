@@ -407,7 +407,7 @@ void* Host::receiveRoutine(void* params)
                         dis->onConnect(socket);
                         break;
                     case RM_SOCK:
-                        if(files.find(socket) != files.end())
+                        if(files.fdSet.find(socket) != files.fdSet.end())
                         {
                             shutdown(socket,SHUT_RDWR);
                             shutdownSocks.insert(socket);

@@ -73,7 +73,7 @@ Dialog::Dialog(QWidget *parent)
  *
  * @signature  Dialog::Dialog()
  */
-Dialog::Dialog()
+Dialog::~Dialog()
 {
     delete ui;
 }
