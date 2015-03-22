@@ -134,6 +134,9 @@ void Dialog::setData(Results passedResults)
     results.filePath = passedResults.filePath;
 
     // convert port number to string...
+    std::stringstream sstm;
+    sstm << results.port;
+    QString portString = sstm.str().c_str();
 
     // set the texts of the dialog with values from passedResults
     ui->lineEdit  ->setText(results.name);

@@ -17,8 +17,7 @@ SOURCES += main.cpp\
     dialog.cpp \
     Host.cpp \
     net_helper.cpp \
-    select_helper.cpp \
-    Server.cpp
+    select_helper.cpp
 
 HEADERS  += serverwindow.h \
     dialog.h \
@@ -26,8 +25,7 @@ HEADERS  += serverwindow.h \
     Message.h \
     net_helper.h \
     protocol.h \
-    select_helper.h \
-    Server.h
+    select_helper.h
 
 FORMS    += serverwindow.ui \
     dialog.ui

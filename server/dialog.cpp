@@ -104,7 +104,7 @@ Dialog::~Dialog()
  */
 Results Dialog::getResults()
 {
-    return theResults;
+    return results;
 }
 
 /**

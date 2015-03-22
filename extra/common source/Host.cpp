@@ -40,6 +40,7 @@ static void fatal_error(const char* errstr);
  */
 Host::Host()
 {
+    svrSock = -1;
     listenThread  = 0;
     receiveThread = 0;
     startReceiveRoutine();
@@ -63,7 +64,15 @@ Host::~Host()
  */
 int Host::startListeningRoutine(short port)
 {
-    localPort = port;
+    // open the server socket
+    if(listenThread == 0)
+    {
+        if((svrSock = make_tcp_server_socket(port)) == -1)
+        {
+            return SOCK_OP_FAIL;
+        }
+    }
+
     return startRoutine(&listenThread,listenRoutine,listenPipe,this);
 }
 
@@ -103,8 +112,7 @@ int Host::connect(char* remoteName, short remotePort)
         write(receivePipe[1],&socket,sizeof(socket));
     }
 
-    // return...
-    return (socket == 0) ? SUCCESS : SOCKET_OP_FAIL;
+    return (socket != -1) ? SUCCESS : SOCK_OP_FAIL;
 }
 
 void Host::disconnect(int socket)
@@ -247,19 +255,16 @@ void* Host::listenRoutine(void* params)
 
     int terminateThread = 0;
 
-    // open the server socket
-    int svrSock = make_tcp_server_socket(dis->localPort);
-
     // set up the socket set & client list
     Files files;
     files_init(&files);
 
     // add the server socket and control pipe to the select set
-    files_add_file(&files,svrSock);
+    files_add_file(&files,dis->svrSock);
     files_add_file(&files,dis->listenPipe[0]);
 
     // accept any connection requests, and create a session for each
-    while(!terminateThread)
+    while(!terminateThread && dis->svrSock != -1)
     {
         // wait for an event on any socket to occur
         if(files_select(&files) == -1)
@@ -280,7 +285,7 @@ void* Host::listenRoutine(void* params)
             }
 
             // handle socket activity depending on which socket it is
-            if(curSock == svrSock)
+            if(curSock == dis->svrSock)
             {
                 /*
                  * this is the server socket, try to accept a connection.
@@ -294,7 +299,7 @@ void* Host::listenRoutine(void* params)
 
                 // accept the connection
                 int newSock;
-                if((newSock = accept(svrSock,0,0)) == -1)
+                if((newSock = accept(dis->svrSock,0,0)) == -1)
                 {
                     // accept failed; server socket closed, terminate thread
                     terminateThread = 1;
@@ -302,6 +307,8 @@ void* Host::listenRoutine(void* params)
                 else
                 {
                     // accept success; add the socket to the receive thread.
+                    char commandType = ADD_SOCK;
+                    write(dis->receivePipe[1],&commandType,sizeof(commandType));
                     write(dis->receivePipe[1],&newSock,sizeof(newSock));
                 }
             }

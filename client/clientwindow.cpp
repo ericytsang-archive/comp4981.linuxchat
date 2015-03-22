@@ -261,7 +261,7 @@ void ClientWindow::onConnect(int socket)
     Net::Message msg;
     msg.type = CHECK_USR_NAME;
     msg.data = (void*)name.toStdString().c_str();
-    msg.len  = strlen((char*)msg.data);
+    msg.len  = strlen((char*)msg.data)+1;
     Host::send(socket,msg);
 }
 
@@ -365,10 +365,18 @@ void ClientWindow::on_actionConnect_triggered()
     }
     else
     {
-        // put application into a connected state
-        ui->actionDisconnect->setEnabled(true);
-        ui->actionSettings->setEnabled(false);
-        Host::connect((char*)ip.toStdString().c_str(),port);
+        if(Host::connect((char*)ip.toStdString().c_str(),port) == 0)
+        {
+            // put application into a connected state
+            ui->actionDisconnect->setEnabled(true);
+            ui->actionSettings->setEnabled(false);
+            appendText("connected with the server");
+        }
+        else
+        {
+            on_actionDisconnect_triggered();
+            appendText("failed to connect with the server");
+        }
     }
 }
 
@@ -471,7 +479,7 @@ void ClientWindow::on_pushButton_clicked()
     Net::Message msg;
     msg.type = SHOW_MSG;
     msg.data = (void*)chatMsg.toStdString().c_str();
-    msg.len  = strlen((char*)msg.data);
+    msg.len  = strlen((char*)msg.data)+1;
     Host::send(socket,msg);
 
     // update the GUI to display chat message, and clear chat input

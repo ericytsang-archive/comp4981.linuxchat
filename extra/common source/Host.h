@@ -20,7 +20,7 @@
 /**
  * indicates that the operation failed due to a socket operation.
  */
-#define SOCKET_OP_FAIL 2
+#define SOCK_OP_FAIL 2
 
 namespace Net
 {
@@ -49,9 +49,9 @@ namespace Net
         static void* receiveRoutine(void* params);
 
         /**
-         * port number used to open for TCP connections to the server.
+         * socket used to listen for new connections from.
          */
-        short localPort;
+        int svrSock;
 
         /**
          * pipe used to communicate with the listenThread.

@@ -1,5 +1,12 @@
 #include "net_helper.h"
 
+#include <stdio.h>
+#include <unistd.h>
+#include <netdb.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+
 #define LISTENQ 5
 
 static void fatal_error(const char* errstr);
@@ -24,7 +31,8 @@ static void fatal_error(const char* errstr);
  *
  * @param      port port number on local host to bind the new server socket to.
  *
- * @return     socket file descriptor to the new server socket
+ * @return     socket file descriptor to the new server socket. may return -1 on
+ *   error.
  */
 int make_tcp_server_socket(short port)
 {
@@ -50,7 +58,9 @@ int make_tcp_server_socket(short port)
     localAddr = make_sockaddr(0, INADDR_ANY, port);
     if(bind(svrSock, (struct sockaddr*) &localAddr, sizeof(localAddr)) == -1)
     {
-        fatal_error("failed to bind server socket to address structure");
+        perror("failed to bind server socket to address structure");
+        close(svrSock);
+        svrSock = -1;
     }
 
     // put server socket into listening mode
@@ -86,7 +96,8 @@ int make_tcp_server_socket(short port)
  * @param      remotePort the remote host's port.
  * @param      localPort the local port. can be 0 if you don't care.
  *
- * @return     socket file descriptor to the new connected client socket
+ * @return     socket file descriptor to the new connected client socket. may
+ *   return -1 on error.
  */
 int make_tcp_client_socket(char* remoteName, long remoteAddr, short remotePort, short localPort)
 {
@@ -109,7 +120,9 @@ int make_tcp_client_socket(char* remoteName, long remoteAddr, short remotePort, 
         local = make_sockaddr(0, INADDR_ANY, localPort);
         if(bind(clntSock, (struct sockaddr*) &local, sizeof(local)) == -1)
         {
-            fatal_error("failed to bind socket to local host");
+            perror("failed to bind socket to local host");
+            close(clntSock);
+            clntSock = -1;
         }
     }
 
@@ -117,7 +130,9 @@ int make_tcp_client_socket(char* remoteName, long remoteAddr, short remotePort, 
     remote = make_sockaddr(remoteName, remoteAddr, remotePort);
     if(connect(clntSock, (struct sockaddr*) &remote, sizeof(remote)) == -1)
     {
-        fatal_error("failed to connect to remote host");
+        perror("failed to connect to remote host");
+        close(clntSock);
+        clntSock = -1;
     }
 
     // return...
@@ -150,7 +165,7 @@ int make_tcp_client_socket(char* remoteName, long remoteAddr, short remotePort, 
  * @param      hostPort the host's port number.
  *
  * @return     sockaddr structure with the provided {hostPort}, and appropriate
- *   IP address.
+ *   IP address. may return 0 on error.
  */
 struct sockaddr make_sockaddr(char* hostName, long hostAddr, short hostPort)
 {
@@ -181,7 +196,10 @@ struct sockaddr make_sockaddr(char* hostName, long hostAddr, short hostPort)
         struct hostent* host;
         if((host = gethostbyname(hostName)) == 0)
         {
-            fatal_error("failed to resolve host");
+            herror("failed to resolve host");
+            struct sockaddr ret;
+            memset(&ret,0,sizeof(ret));
+            return ret;
         }
 
         // set address structure's address from query results
@@ -239,6 +257,25 @@ int read_file(int socket, void* bufferPointer, int bytesToRead)
     return result;
 }
 
+/**
+ * prints the error message, then exits the program.
+ *
+ * @function   fatal_error
+ *
+ * @date       2015-03-22
+ *
+ * @revision   none
+ *
+ * @designer   EricTsang
+ *
+ * @programmer EricTsang
+ *
+ * @note       none
+ *
+ * @signature  static void fatal_error(const char* errstr)
+ *
+ * @param      errstr string to print before exiting the program
+ */
 static void fatal_error(const char* errstr)
 {
     perror(errstr);

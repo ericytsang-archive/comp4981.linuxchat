@@ -228,11 +228,10 @@ void ServerWindow::onConnect(int socket)
     newClntMsg.type = ADD_CLIENT;
     for(auto client = lis.begin(); client != lis.end(); ++client)
     {
-        int currSocket = client.key();
         QListWidgetItem* currListItem = client.value();
 
         newClntMsg.data = (void*)currListItem->text().toStdString().c_str();
-        newClntMsg.len  = strlen((char*)newClntMsg.data);
+        newClntMsg.len  = strlen((char*)newClntMsg.data)+1;
         send(socket,newClntMsg);
     }
 }
@@ -343,10 +342,18 @@ void ServerWindow::on_actionConnect_triggered()
     }
     else
     {
-        // put application into a connected state
-        ui->actionDisconnect->setEnabled(true);
-        ui->actionSettings->setEnabled(false);
-        startListeningRoutine(port);
+        if(startListeningRoutine(port) == 0)
+        {
+            // put application into a connected state
+            ui->actionDisconnect->setEnabled(true);
+            ui->actionSettings->setEnabled(false);
+            appendText("started the server");
+        }
+        else
+        {
+            on_actionDisconnect_triggered();
+            appendText("failed to start the server");
+        }
     }
 }
 
@@ -510,7 +517,7 @@ void ServerWindow::onCheckUserName(int socket, char* cname)
     Net::Message newClntMsg;
     newClntMsg.type = ADD_CLIENT;
     newClntMsg.data = (void*)name.toStdString().c_str();
-    newClntMsg.len  = strlen((char*)newClntMsg.data);
+    newClntMsg.len  = strlen((char*)newClntMsg.data)+1;
     for(auto client = lis.begin(); client != lis.end(); ++client)
     {
         int currSocket = client.key();

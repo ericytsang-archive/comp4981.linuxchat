@@ -47,6 +47,7 @@ public:
     void addUserListEntry(int key, QString usrName);
     void rmUserListEntry(int key);
     void clearUserList();
+    void appendText(char* message);
 
 protected:
     virtual void onConnect(int socket);
@@ -62,7 +63,6 @@ private slots:
 private:
     void onAddClient(int socket, char* clientName);
     void onRmClient(int socket);
-    void onShowMessage(char* message);
     void onSetName(char* newUsername);
     Ui::MainWindow *ui;
     /**
