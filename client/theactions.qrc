@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/theIcons">
+        <file>theIcons/anohana_wallpaper_by_slydog0905-d4d02e7.png</file>
+        <file>theIcons/bad_piggy_by_mikeinel-d5lz778.jpg</file>
+        <file>theIcons/sandshrew_wallpaper_by_dragonsdenda-d5zmlri.jpg</file>
+    </qresource>
+</RCC>
