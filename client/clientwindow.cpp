@@ -1,6 +1,13 @@
 #include "clientwindow.h"
 #include "ui_clientwindow.h"
 #include "dialog.h"
+#include "Message.h"
+#include "protocol.h"
+
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
 #include <qmessagebox.h>
 
 ClientWindow::ClientWindow(QWidget *parent) :
@@ -51,6 +58,12 @@ void ClientWindow::onConnect(int socket)
     char buffer[1024];
     sprintf(buffer,"socket %d connected",socket);
     onShowMessage(buffer);
+
+    Net::Message msg;
+    msg.type = CHECK_USR_NAME;
+    msg.data = (void*)name.toStdString().c_str();
+    msg.len  = strlen((char*)msg.data);
+    Host::send(socket,msg);
 }
 
 void ClientWindow::onMessage(int socket, Net::Message msg)
@@ -83,11 +96,11 @@ void ClientWindow::onDisconnect(int socket, int remote)
 void ClientWindow::on_actionConnect_triggered()
 {
     if (!ui->actionConnect->isChecked()){
-        ui->actionDisconnect->setEnabled(false);
-        ui->actionSettings->setEnabled(true);
+        on_actionDisconnect_triggered();
     } else {
         ui->actionDisconnect->setEnabled(true);
         ui->actionSettings->setEnabled(false);
+        Host::connect((char*)ip.toStdString().c_str(),port);
     }
 }
 
@@ -96,15 +109,11 @@ void ClientWindow::on_actionDisconnect_triggered()
     ui->actionConnect->setChecked(false);
     ui->actionDisconnect->setEnabled(false);
     ui->actionSettings->setEnabled(true);
+    ::close(this->socket);
 }
 
 void ClientWindow::on_actionSettings_triggered()
 {
-    /* PopUp message before the settings*/
-    QMessageBox pop;
-     pop.setText("Display port: " + QString::number(port) + "\nIP: " + ip +"\nName: " + name +"\nFile Path: " + filePath);
-    pop.exec();
-
     Dialog settings(this);
     Results savedResults;
     savedResults.port = port;
@@ -122,33 +131,38 @@ void ClientWindow::on_actionSettings_triggered()
     name = passed.name;
     filePath = passed.filePath;
 
-    /* PopUp message after the settings*/
-    pop.setText("Display port: " + QString::number(port) + "\nIP: " + ip +"\nName: " + name +"\nFile Path: " + filePath);
-    pop.exec();
-
-
+    ::close(file);
+    file = open(filePath.toStdString().c_str(),O_APPEND|O_CREAT|O_WRONLY,0777);
+    if(file == -1)
+    {
+        perror("failed to open file");
+    }
 }
 
 void ClientWindow::on_pushButton_clicked()
 {
-    Host::send(socket,ui->textEdit->toPlainText());
+    Net::Message msg;
+    msg.type = SHOW_MSG;
+    msg.data = (void*)ui->textEdit->toPlainText().toStdString().c_str();
+    msg.len  = strlen((char*)msg.data);
+    Host::send(socket,msg);
     ui->textBrowser->append(ui->textEdit->toPlainText());
     ui->textEdit->setText("");
 }
 
-void onAddClient(int socket, char* clientName)
+void ClientWindow::onAddClient(int socket, char* clientName)
 {
     add_user(socket,QString::fromAscii(clientName));
 }
 
-void onRmClient(int socket)
+void ClientWindow::onRmClient(int socket)
 {
     rm_user(socket);
 }
 
-void onShowMessage(char* message)
+void ClientWindow::onShowMessage(char* message)
 {
-    ui->textBrowser->append(QString::fromAscii(message);
+    ui->textBrowser->append(name+": "+QString::fromAscii(message));
 
     if(file != -1)
     {
@@ -163,7 +177,7 @@ void onShowMessage(char* message)
     }
 }
 
-void onSetName(char* newUsername)
+void ClientWindow::onSetName(char* newUsername)
 {
     name = QString::fromAscii(newUsername);
 }

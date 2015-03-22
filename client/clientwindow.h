@@ -1,8 +1,16 @@
 #ifndef CLIENTWINDOW_H
 #define CLIENTWINDOW_H
 
+#include "Host.h"
+
 #include <QMainWindow>
 #include <QListWidgetItem>
+
+namespace Net
+{
+class Host;
+struct Message;
+}
 
 namespace Ui {
 class MainWindow;
@@ -31,8 +39,8 @@ private slots:
     void on_pushButton_clicked();
 
 private:
-    void onAddClient(char* clientName);
-    void onRmClient(char* clientName);
+    void onAddClient(int socket, char* clientName);
+    void onRmClient(int socket);
     void onShowMessage(char* message);
     void onSetName(char* newUsername);
     int port;

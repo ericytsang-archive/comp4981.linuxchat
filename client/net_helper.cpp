@@ -181,6 +181,7 @@ struct sockaddr make_sockaddr(char* hostName, long hostAddr, short hostPort)
         struct hostent* host;
         if((host = gethostbyname(hostName)) == 0)
         {
+            fprintf(stderr,"h_errno: %d\n",h_errno);
             fatal_error("failed to resolve host");
         }
 

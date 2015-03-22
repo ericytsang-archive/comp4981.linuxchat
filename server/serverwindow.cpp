@@ -28,7 +28,6 @@ ServerWindow::ServerWindow(QWidget *parent) :
 
 ServerWindow::~ServerWindow()
 {
-    file = ::close(file);
     delete ui;
 }
 
@@ -112,9 +111,7 @@ void ServerWindow::onDisconnect(int socket, int remote)
 void ServerWindow::on_actionConnect_triggered()
 {
     if (!ui->actionConnect->isChecked()){
-        ui->actionDisconnect->setEnabled(false);
-        ui->actionSettings->setEnabled(true);
-        stopListeningRoutine();
+        on_actionDisconnect_triggered();
     } else {
         ui->actionDisconnect->setEnabled(true);
         ui->actionSettings->setEnabled(false);
@@ -151,11 +148,6 @@ void ServerWindow::on_actionSettings_triggered()
     {
         perror("failed to open file");
     }
-
-    /* PopUp message after the settings*/
-    QMessageBox pop;
-    pop.setText("Display port: " + QString::number(port) + "\nFile Path: " + filePath);
-    pop.exec();
 }
 
 void ServerWindow::onShowMessage(int socket, char* cstr)

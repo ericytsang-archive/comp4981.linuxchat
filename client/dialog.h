@@ -27,15 +27,10 @@ public:
 
 private slots:
     void on_lineEdit_textChanged(const QString &arg1);
-
     void on_lineEdit_2_textChanged(const QString &arg1);
-
     void on_lineEdit_3_textChanged(const QString &arg1);
-
     void on_lineEdit_4_textChanged(const QString &arg1);
-
     void on_buttonBox_accepted();
-
     void on_buttonBox_rejected();
 
 private:

@@ -1,6 +1,8 @@
 #include "dialog.h"
 #include "ui_dialog.h"
 
+#include <sstream>
+
 Results theResults;
 int tempPort = 80;
 QString tempName = "";
@@ -27,6 +29,23 @@ Dialog::~Dialog()
 Results Dialog::getResults(){
 
     return theResults;
+}
+
+void Dialog::setData(Results passedResults)
+{
+    prevName = passedResults.name;
+    prevIP = passedResults.ip;
+    prevPort = passedResults.port;
+    prevFilePath = passedResults.filePath;
+
+    std::stringstream sstm;
+    sstm << prevPort;
+    QString portString = sstm.str().c_str();
+
+    ui->lineEdit->setText(prevName);
+    ui->lineEdit_2->setText(prevIP);
+    ui->lineEdit_3->setText(portString);
+    ui->lineEdit_4->setText(prevFilePath);
 }
 
 void Dialog::on_lineEdit_textChanged(const QString &arg1)
