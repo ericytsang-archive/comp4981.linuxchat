@@ -159,7 +159,7 @@ void ServerWindow::onShowMessage(int socket, char* cstr)
     Net::Message msg;
     msg.type = SHOW_MSG;
     msg.data = (void*) cstr;
-    msg.len  = strlen(cstr);
+    msg.len  = strlen(cstr)+1;
     for(auto client = lis.begin(); client != lis.end(); ++client)
     {
         int currSocket = client.key();
@@ -187,7 +187,7 @@ void ServerWindow::onCheckUserName(int socket, char* cname)
     Net::Message newNameMsg;
     newNameMsg.type = SET_USR_NAME;
     newNameMsg.data = (void*)name.toStdString().c_str();
-    newNameMsg.len  = strlen((char*)newNameMsg.data);
+    newNameMsg.len  = strlen((char*)newNameMsg.data)+1;
     send(socket,newNameMsg);
 
     // add client to client list

@@ -48,6 +48,7 @@ private:
     int socket;
     QString ip;
     QString name;
+    QString displayName;
     QString filePath;
     Ui::MainWindow *ui;
     QMap<int,QListWidgetItem*> lis;

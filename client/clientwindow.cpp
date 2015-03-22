@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <qmessagebox.h>
+#include <sys/socket.h>
 
 ClientWindow::ClientWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -25,6 +26,7 @@ ClientWindow::ClientWindow(QWidget *parent) :
     socket = -1;
     ip = "localhost";
     name = "waifu00";
+    displayName = "";
     filePath = "/";
 }
 
@@ -111,7 +113,7 @@ void ClientWindow::on_actionDisconnect_triggered()
     ui->actionConnect->setChecked(false);
     ui->actionDisconnect->setEnabled(false);
     ui->actionSettings->setEnabled(true);
-    Host::disconnect(this->socket);
+    ::shutdown(this->socket,SHUT_RDWR);
 }
 
 void ClientWindow::on_actionSettings_triggered()
@@ -143,12 +145,15 @@ void ClientWindow::on_actionSettings_triggered()
 
 void ClientWindow::on_pushButton_clicked()
 {
+    QString chatMsg = displayName+": "+ui->textEdit->toPlainText();
+
     Net::Message msg;
     msg.type = SHOW_MSG;
-    msg.data = (void*)ui->textEdit->toPlainText().toStdString().c_str();
+    msg.data = (void*)chatMsg.toStdString().c_str();
     msg.len  = strlen((char*)msg.data);
     Host::send(socket,msg);
-    ui->textBrowser->append(ui->textEdit->toPlainText());
+
+    onShowMessage((char*)msg.data);
     ui->textEdit->setText("");
 }
 
@@ -164,7 +169,7 @@ void ClientWindow::onRmClient(int socket)
 
 void ClientWindow::onShowMessage(char* message)
 {
-    ui->textBrowser->append(name+": "+QString::fromAscii(message));
+    ui->textBrowser->append(QString::fromAscii(message));
 
     if(file != -1)
     {
@@ -181,5 +186,5 @@ void ClientWindow::onShowMessage(char* message)
 
 void ClientWindow::onSetName(char* newUsername)
 {
-    name = QString::fromAscii(newUsername);
+    displayName = QString::fromAscii(newUsername);
 }
