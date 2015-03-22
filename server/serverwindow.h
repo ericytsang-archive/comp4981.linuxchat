@@ -26,9 +26,9 @@ public:
     void rm_user(int key);
 
 protected:
-    void onConnect(int socket);
-    void onMessage(int socket, Net::Message msg);
-    void onDisconnect(int socket, int remote);
+    virtual void onConnect(int socket);
+    virtual void onMessage(int socket, Net::Message msg);
+    virtual void onDisconnect(int socket, int remote);
 
 private slots:
     void on_actionConnect_triggered();
