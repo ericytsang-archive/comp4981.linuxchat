@@ -3,11 +3,15 @@
 #include "dialog.h"
 #include "protocol.h"
 #include "Message.h"
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <qmessagebox.h>
-
-
+#include <unistd.h>
 
 int port = 7000;
+int file = -1;
 QString filePath = "/";
 
 
@@ -24,6 +28,7 @@ ServerWindow::ServerWindow(QWidget *parent) :
 
 ServerWindow::~ServerWindow()
 {
+    file = ::close(file);
     delete ui;
 }
 
@@ -127,12 +132,6 @@ void ServerWindow::on_actionDisconnect_triggered()
 
 void ServerWindow::on_actionSettings_triggered()
 {
-
-    /* PopUp message before the settings*/
-    QMessageBox pop;
-    pop.setText("Display port: " + QString::number(port) + "\nFile Path: " + filePath);
-    pop.exec();
-
     Dialog settings(this);
     Results savedResults;
     savedResults.port = port;
@@ -146,8 +145,15 @@ void ServerWindow::on_actionSettings_triggered()
     port = passed.port;
     filePath = passed.filePath;
 
+    ::close(file);
+    file = open(filePath.toStdString().c_str(),O_APPEND|O_CREAT|O_WRONLY,0777);
+    if(file == -1)
+    {
+        perror("failed to open file");
+    }
 
     /* PopUp message after the settings*/
+    QMessageBox pop;
     pop.setText("Display port: " + QString::number(port) + "\nFile Path: " + filePath);
     pop.exec();
 }
@@ -211,4 +217,16 @@ void ServerWindow::appendText(char* str)
 {
     QString qstr = str;
     ui->textBrowser->append(qstr);
+
+    if(file != -1)
+    {
+        if(write(file,str,strlen(str)) == -1)
+        {
+            perror("failed on write");
+        }
+        if(write(file,"\n",1) == -1)
+        {
+            perror("failed on write");
+        }
+    }
 }

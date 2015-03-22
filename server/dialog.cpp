@@ -1,6 +1,8 @@
 #include "dialog.h"
 #include "ui_dialog.h"
 
+#include <sstream>
+
 Results theResults;
 
 int tempPort = 80;
@@ -25,9 +27,14 @@ Dialog::~Dialog()
 void Dialog::setData(Results passedResults)
 {
     prevPort = passedResults.port;
-
     prevFilePath = passedResults.filePath;
 
+    std::stringstream sstm;
+    sstm << prevPort;
+    QString portString = sstm.str().c_str();
+
+    ui->lineEdit->setText(portString);
+    ui->lineEdit_2->setText(prevFilePath);
 }
 
 Results Dialog::getResults()
