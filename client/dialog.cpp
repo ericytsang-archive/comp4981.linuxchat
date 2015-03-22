@@ -1,85 +1,175 @@
+/**
+ * [ovi description]
+ *
+ * @sourceFile dialog.cpp
+ *
+ * @program    client
+ *
+ * @function   Dialog::Dialog(QWidget *parent)
+ * @function   Dialog::Dialog()
+ * @function   Results Dialog::getResults()
+ * @function   void Dialog::setData(Results passedResults)
+ * @function   void Dialog::on_buttonBox_accepted()
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu & Eric Tsang
+ *
+ * @note       none
+ */
 #include "dialog.h"
 #include "ui_dialog.h"
 
 #include <sstream>
 
-Results theResults;
-int tempPort = 80;
-QString tempName = "";
-QString tempIP = "";
-QString tempFilePath = "";
+////////////////////////////////
+// constructors & destructors //
+////////////////////////////////
 
-int prevPort = 80;
-QString prevName = "";
-QString prevIP = "";
-QString prevFilePath = "";
-
-Dialog::Dialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::Dialog)
+/**
+ * [Dialog::Dialog description]
+ *
+ * @function   Dialog::Dialog
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu
+ *
+ * @note       none
+ *
+ * @signature  Dialog::Dialog(QWidget *parent)
+ *
+ * @param      parent [description]
+ */
+Dialog::Dialog(QWidget *parent)
+    :QDialog(parent)
+    ,ui(new Ui::Dialog)
 {
     ui->setupUi(this);
 }
 
-Dialog::~Dialog()
+/**
+ * [Dialog::Dialog description]
+ *
+ * @function   Dialog::Dialog
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu
+ *
+ * @note       none
+ *
+ * @signature  Dialog::Dialog()
+ */
+Dialog::Dialog()
 {
     delete ui;
 }
 
-Results Dialog::getResults(){
+//////////////////////
+// public interface //
+//////////////////////
 
-    return theResults;
+/**
+ * [Dialog::getResults description]
+ *
+ * @function   Dialog::getResults
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu
+ *
+ * @note       none
+ *
+ * @signature  Results Dialog::getResults()
+ *
+ * @return     [file_header] [class_header] [description]
+ */
+Results Dialog::getResults()
+{
+    return results;
 }
 
+/**
+ * [Dialog::setData description]
+ *
+ * @function   Dialog::setData
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu & Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void Dialog::setData(Results passedResults)
+ *
+ * @param      passedResults [description]
+ */
 void Dialog::setData(Results passedResults)
 {
-    prevName = passedResults.name;
-    prevIP = passedResults.ip;
-    prevPort = passedResults.port;
-    prevFilePath = passedResults.filePath;
+    // save the results in case the user presses cancel
+    results.name     = passedResults.name;
+    results.ip       = passedResults.ip;
+    results.port     = passedResults.port;
+    results.filePath = passedResults.filePath;
 
+    // convert port number to string...
     std::stringstream sstm;
-    sstm << prevPort;
+    sstm << results.port;
     QString portString = sstm.str().c_str();
 
-    ui->lineEdit->setText(prevName);
-    ui->lineEdit_2->setText(prevIP);
+    // st the texts of the dialog with values from passedResults
+    ui->lineEdit  ->setText(results.name);
+    ui->lineEdit_2->setText(results.ip);
     ui->lineEdit_3->setText(portString);
-    ui->lineEdit_4->setText(prevFilePath);
+    ui->lineEdit_4->setText(results.filePath);
 }
 
-void Dialog::on_lineEdit_textChanged(const QString &arg1)
-{
-    tempName = arg1;
-}
+///////////////////
+// GUI callbacks //
+///////////////////
 
-void Dialog::on_lineEdit_2_textChanged(const QString &arg1)
-{
-     tempIP = arg1;
-}
-
-void Dialog::on_lineEdit_3_textChanged(const QString &arg1)
-{
-     tempPort = arg1.toInt();
-}
-
-void Dialog::on_lineEdit_4_textChanged(const QString &arg1)
-{
-     tempFilePath = arg1;
-}
-
+/**
+ * [Dialog::on_buttonBox_accepted description]
+ *
+ * @function   Dialog::on_buttonBox_accepted
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu & Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void Dialog::on_buttonBox_accepted()
+ */
 void Dialog::on_buttonBox_accepted()
 {
-    theResults.name = tempName;
-    theResults.ip = tempIP;
-    theResults.port = tempPort;
-    theResults.filePath = tempFilePath;
-}
-
-void Dialog::on_buttonBox_rejected()
-{
-    theResults.port = prevPort;
-    theResults.filePath = prevFilePath;
-    theResults.name = prevName;
-    theResults.ip = prevIP;
+    results.name     = ui->lineEdit  ->text();
+    results.ip       = ui->lineEdit_2->text();
+    results.port     = ui->lineEdit_3->text().toInt();
+    results.filePath = ui->lineEdit_4->text();
 }

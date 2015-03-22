@@ -1,3 +1,20 @@
+/**
+ * [void description]
+ *
+ * @sourceFile clientwindow.h
+ *
+ * @program    client
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu & Eric Tsang
+ *
+ * @note       none
+ */
 #ifndef CLIENTWINDOW_H
 #define CLIENTWINDOW_H
 
@@ -5,6 +22,10 @@
 
 #include <QMainWindow>
 #include <QListWidgetItem>
+
+//////////////////////////
+// forward declarations //
+//////////////////////////
 
 namespace Net
 {
@@ -16,6 +37,10 @@ namespace Ui {
 class MainWindow;
 }
 
+/**
+ * the {ClientWindow} handles GUI events, updates the GUI as needed, and lets
+ *   the user interact with the networking calls.
+ */
 class ClientWindow : public QMainWindow, public Net::Host
 {
     Q_OBJECT
@@ -23,9 +48,9 @@ class ClientWindow : public QMainWindow, public Net::Host
 public:
     explicit ClientWindow(QWidget *parent = 0);
     ~ClientWindow();
-    void add_user(int key, QString usrName);
-    void rm_user(int key);
-    void clr_users();
+    void addUserListEntry(int key, QString usrName);
+    void rmUserListEntry(int key);
+    void clearUserList();
 
 protected:
     virtual void onConnect(int socket);

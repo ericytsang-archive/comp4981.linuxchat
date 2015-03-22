@@ -16,8 +16,19 @@
 #include <pthread.h>
 #include <signal.h>
 #include <vector>
+#include <set>
 
-// #define DEBUG
+/**
+ * communicate to the receive thread through the receive pipe, to read a socket
+ *   from the receive pipe, and add it to the set of sockets to select.
+ */
+#define ADD_SOCK 0
+
+/**
+ * communicate to the receive thread through the receive pipe, to read a socket
+ *   from the receive pipe, and remove it from the set of sockets to select.
+ */
+#define RM_SOCK 1
 
 using namespace Net;
 
@@ -87,6 +98,8 @@ int Host::connect(char* remoteName, short remotePort)
     if(socket != -1)
     {
         // communicate to receive thread that a new socket is connected
+        char commandType = ADD_SOCK;
+        write(receivePipe[1],&commandType,sizeof(commandType));
         write(receivePipe[1],&socket,sizeof(socket));
     }
 
@@ -94,31 +107,33 @@ int Host::connect(char* remoteName, short remotePort)
     return (socket == 0) ? SUCCESS : SOCKET_OP_FAIL;
 }
 
+void Host::disconnect(int socket)
+{
+    // communicate to receive thread to remove an existing socket
+    char commandType = RM_SOCK;
+    write(receivePipe[1],&commandType,sizeof(commandType));
+    write(receivePipe[1],&socket,sizeof(socket));
+}
+
 void Host::onConnect(int socket)
 {
     printf("server: socket %d connected\n",socket);
-    fflush(stdout);
 }
 
 void Host::onMessage(int socket, Message msg)
 {
-    printf("server: socket %d: %d: ",socket,msg.type);
-
-
-    //this prints out the name of the user
+    printf("server: socket %d: msg.type: %d, msg.data: ",socket,msg.type);
     for(int i = 0; i < msg.len; ++i)
     {
         printf("%c",((char*)msg.data)[i]);
     }
-
     printf("\n");
-    fflush(stdout);
 }
 
 void Host::onDisconnect(int socket, int remote)
 {
-    printf("server: socket %d disconnected by %s host\n",socket,remote?"remote":"local");
-    fflush(stdout);
+    printf("server: socket %d disconnected by %s host\n",
+        socket,remote?"remote":"local");
 }
 
 int Host::startReceiveRoutine()
@@ -196,7 +211,8 @@ int Host::startRoutine(pthread_t* thread, void*(*routine)(void*), int* controlPi
  * @signature  int Host::stopRoutine(pthread_t* thread, int* controlPipe)
  *
  * @param      thread pointer to a thread id variable.
- * @param      controlPipe pointer to an integer array of size 2, used to hold the read and write file descriptors of a pipe.
+ * @param      controlPipe pointer to an integer array of size 2, used to hold
+ *   the read and write file descriptors of a pipe.
  *
  * @return     integer values indicating the outcome of the operation.
  */
@@ -327,6 +343,9 @@ void* Host::receiveRoutine(void* params)
     // used to break the while loop
     int terminateThread = 0;
 
+    // set of sockets that have been shutdown from local host
+    std::set<int> shutdownSocks;
+
     // set up the socket set & client list
     Files files;
     files_init(&files);
@@ -368,8 +387,8 @@ void* Host::receiveRoutine(void* params)
                  *   now connected, and needs to be added to the selection set.
                  */
 
-                int socket;
-                if(read_file(dis->receivePipe[0],&socket,sizeof(socket)) == 0)
+                char cmdType;
+                if(read_file(dis->receivePipe[0],&cmdType,sizeof(cmdType)) == 0)
                 {
                     // pipe closed; the client is being deleted, thread should
                     // terminate
@@ -377,9 +396,24 @@ void* Host::receiveRoutine(void* params)
                 }
                 else
                 {
-                    // pipe read; a new socket is being added to the select set
-                    files_add_file(&files,socket);
-                    dis->onConnect(socket);
+                    // pipe read; read a socket from the pipe, and depending on
+                    // the cmdType, do something with it
+                    int socket;
+                    read_file(dis->receivePipe[0],&socket,sizeof(socket));
+                    switch(cmdType)
+                    {
+                    case ADD_SOCK:
+                        files_add_file(&files,socket);
+                        dis->onConnect(socket);
+                        break;
+                    case RM_SOCK:
+                        if(files.find(socket) != files.end())
+                        {
+                            shutdown(socket,SHUT_RDWR);
+                            shutdownSocks.insert(socket);
+                        }
+                        break;
+                    }
                 }
             }
             else
@@ -400,7 +434,10 @@ void* Host::receiveRoutine(void* params)
                 {
                     // socket closed; remove from select set, and call callback
                     files_rm_file(&files,curSock);
-                    dis->onDisconnect(curSock,(close(curSock) == 0));
+                    int remote = (shutdownSocks.erase(curSock) == 0
+                        && close(curSock) == 0);
+                    dis->onDisconnect(curSock,remote);
+                    close(curSock);
                 }
                 else
                 {
