@@ -30,8 +30,7 @@ HEADERS  += serverwindow.h \
 FORMS    += serverwindow.ui \
     dialog.ui
 
-RESOURCES += \
-    theicons.qrc
+RESOURCES +=
 
 DISTFILES +=
 

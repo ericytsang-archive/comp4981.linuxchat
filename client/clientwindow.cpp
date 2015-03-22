@@ -213,6 +213,8 @@ void ClientWindow::appendText(char* message)
 {
     // append the passed text onto the screen
     ui->textBrowser->append(QString::fromAscii(message));
+
+    // scroll to the bottom
     ui->textBrowser->verticalScrollBar()->setValue(
         ui->textBrowser->verticalScrollBar()->maximum());
 

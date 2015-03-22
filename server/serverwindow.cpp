@@ -182,6 +182,8 @@ void ServerWindow::appendText(char* str)
 {
     // append the passed text onto the screen
     ui->textBrowser->append(QString::fromAscii(str));
+
+    // scroll to the bottom
     ui->textBrowser->verticalScrollBar()->setValue(
         ui->textBrowser->verticalScrollBar()->maximum());
 

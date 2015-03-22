@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>883</width>
-    <height>597</height>
+    <height>561</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -112,60 +112,26 @@
    <addaction name="actionSettings"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <widget class="QMenuBar" name="menuBar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>883</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="menuBanana">
-    <property name="title">
-     <string>Options</string>
-    </property>
-    <addaction name="separator"/>
-    <addaction name="actionConnect"/>
-    <addaction name="actionDisconnect"/>
-    <addaction name="actionSettings"/>
-   </widget>
-   <addaction name="menuBanana"/>
-  </widget>
   <action name="actionConnect">
    <property name="checkable">
     <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="theactions.qrc">
-     <normaloff>:/theIcons/theIcons/anohana_wallpaper_by_slydog0905-d4d02e7.png</normaloff>:/theIcons/theIcons/anohana_wallpaper_by_slydog0905-d4d02e7.png</iconset>
    </property>
    <property name="text">
     <string>Connect</string>
    </property>
   </action>
   <action name="actionDisconnect">
-   <property name="icon">
-    <iconset resource="theactions.qrc">
-     <normaloff>:/theIcons/theIcons/bad_piggy_by_mikeinel-d5lz778.jpg</normaloff>:/theIcons/theIcons/bad_piggy_by_mikeinel-d5lz778.jpg</iconset>
-   </property>
    <property name="text">
     <string>Disconnect</string>
    </property>
   </action>
   <action name="actionSettings">
-   <property name="icon">
-    <iconset resource="theactions.qrc">
-     <normaloff>:/theIcons/theIcons/sandshrew_wallpaper_by_dragonsdenda-d5zmlri.jpg</normaloff>:/theIcons/theIcons/sandshrew_wallpaper_by_dragonsdenda-d5zmlri.jpg</iconset>
-   </property>
    <property name="text">
     <string>Settings</string>
    </property>
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources>
-  <include location="theactions.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

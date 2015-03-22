@@ -32,11 +32,8 @@ FORMS    += \
     dialog.ui \
     clientwindow.ui
 
-RESOURCES += \
-    theIcons.qrc \
-    theactions.qrc
+RESOURCES +=
 
 OTHER_FILES += \
-    client.pro.user \
 
 QMAKE_CXXFLAGS += -std=c++11
