@@ -33,11 +33,6 @@ ClientWindow::~ClientWindow()
     delete ui;
 }
 
-void ClientWindow::append_window_text(QString string)
-{
-    ui->textBrowser->append(string);
-}
-
 void ClientWindow::add_user(int key, QString usrName)
 {
     QListWidgetItem* li = new QListWidgetItem(usrName);
@@ -50,6 +45,12 @@ void ClientWindow::rm_user(int key)
     ui->listWidget->removeItemWidget(lis[key]);
     delete lis[key];
     lis.remove(key);
+}
+
+void ClientWindow::clr_users()
+{
+    ui->listWidget->clear();
+    lis.clear();
 }
 
 void ClientWindow::onConnect(int socket)
@@ -91,6 +92,7 @@ void ClientWindow::onDisconnect(int socket, int remote)
     char buffer[1024];
     sprintf(buffer,"socket %d disconnected by %s host",socket,remote?"remote":"local");
     onShowMessage(buffer);
+    clr_users();
 }
 
 void ClientWindow::on_actionConnect_triggered()
@@ -109,7 +111,7 @@ void ClientWindow::on_actionDisconnect_triggered()
     ui->actionConnect->setChecked(false);
     ui->actionDisconnect->setEnabled(false);
     ui->actionSettings->setEnabled(true);
-    ::close(this->socket);
+    Host::disconnect(this->socket);
 }
 
 void ClientWindow::on_actionSettings_triggered()

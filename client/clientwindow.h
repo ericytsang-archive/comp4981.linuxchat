@@ -23,9 +23,9 @@ class ClientWindow : public QMainWindow, public Net::Host
 public:
     explicit ClientWindow(QWidget *parent = 0);
     ~ClientWindow();
-    void append_window_text(QString string);
     void add_user(int key, QString usrName);
     void rm_user(int key);
+    void clr_users();
 
 protected:
     virtual void onConnect(int socket);
