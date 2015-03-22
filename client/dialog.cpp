@@ -59,7 +59,7 @@ Dialog::Dialog(QWidget *parent)
 /**
  * [Dialog::Dialog description]
  *
- * @function   Dialog::Dialog
+ * @function   Dialog::~Dialog
  *
  * @date       2015-03-21
  *
@@ -71,7 +71,7 @@ Dialog::Dialog(QWidget *parent)
  *
  * @note       none
  *
- * @signature  Dialog::Dialog()
+ * @signature  Dialog::~Dialog()
  */
 Dialog::~Dialog()
 {
@@ -134,11 +134,8 @@ void Dialog::setData(Results passedResults)
     results.filePath = passedResults.filePath;
 
     // convert port number to string...
-    std::stringstream sstm;
-    sstm << results.port;
-    QString portString = sstm.str().c_str();
 
-    // st the texts of the dialog with values from passedResults
+    // set the texts of the dialog with values from passedResults
     ui->lineEdit  ->setText(results.name);
     ui->lineEdit_2->setText(results.ip);
     ui->lineEdit_3->setText(portString);
@@ -168,6 +165,7 @@ void Dialog::setData(Results passedResults)
  */
 void Dialog::on_buttonBox_accepted()
 {
+    // put text box contents into result structure
     results.name     = ui->lineEdit  ->text();
     results.ip       = ui->lineEdit_2->text();
     results.port     = ui->lineEdit_3->text().toInt();

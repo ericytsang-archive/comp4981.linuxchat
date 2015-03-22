@@ -1,3 +1,20 @@
+/**
+ * [void  description]
+ *
+ * @sourceFile dialog.h
+ *
+ * @program    server
+ *
+ * @date       2015-03-22
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu
+ *
+ * @note       none
+ */
 #ifndef DIALOG_H
 #define DIALOG_H
 
@@ -7,12 +24,18 @@ namespace Ui {
 class Dialog;
 }
 
+/**
+ * holds the configuration results indicated by the user, once they are done
+ *   with the dialog box.
+ */
 struct Results {
     int port;
     QString filePath;
 };
 
-
+/**
+ * dialog box, used to get the user's preferences.
+ */
 class Dialog : public QDialog
 {
     Q_OBJECT
@@ -24,16 +47,11 @@ public:
     void setData(Results passedResults);
 
 private slots:
-    void on_lineEdit_textChanged(const QString &arg1);
-
-    void on_lineEdit_2_textChanged(const QString &arg1);
-
     void on_buttonBox_accepted();
-
-    void on_buttonBox_rejected();
 
 private:
     Ui::Dialog *ui;
+    Results results;
 };
 
 #endif // DIALOG_H

@@ -23,10 +23,6 @@
 #include <QMainWindow>
 #include <QListWidgetItem>
 
-//////////////////////////
-// forward declarations //
-//////////////////////////
-
 namespace Net
 {
 class Host;
@@ -68,14 +64,39 @@ private:
     void onRmClient(int socket);
     void onShowMessage(char* message);
     void onSetName(char* newUsername);
-    int port;
-    int file;
-    int socket;
-    QString ip;
-    QString name;
-    QString displayName;
-    QString filePath;
     Ui::MainWindow *ui;
+    /**
+     * port number to connect to.
+     */
+    int port;
+    /**
+     * file descriptor to a file to record chat history to.
+     */
+    int file;
+    /**
+     * socket that's connected with the server.
+     */
+    int socket;
+    /**
+     * name of the remote host.
+     */
+    QString ip;
+    /**
+     * name that we want to be seen as in the chat room.
+     */
+    QString name;
+    /**
+     * the actual name we use in the chat room, because of possibility of name
+     *   collisions.
+     */
+    QString displayName;
+    /**
+     * path to file to record chat history to.
+     */
+    QString filePath;
+    /**
+     * maps sockets to list items on the user list GUI widget.
+     */
     QMap<int,QListWidgetItem*> lis;
 };
 

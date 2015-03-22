@@ -1,3 +1,34 @@
+/**
+ * [void description]
+ *
+ * @sourceFile serverwindow.cpp
+ *
+ * @program    server
+ *
+ * @function   ServerWindow::ServerWindow(QWidget *parent)
+ * @function   ServerWindow::~ServerWindow()
+ * @function   void ServerWindow::addUserListEntry(int key, QString usrName)
+ * @function   void ServerWindow::rmUserListEntry(int key)
+ * @function   void ServerWindow::appendText(char* str)
+ * @function   void ServerWindow::onConnect(int socket)
+ * @function   void ServerWindow::onMessage(int socket, Net::Message msg)
+ * @function   void ServerWindow::onDisconnect(int socket, int remote)
+ * @function   void ServerWindow::on_actionConnect_triggered()
+ * @function   void ServerWindow::on_actionDisconnect_triggered()
+ * @function   void ServerWindow::on_actionSettings_triggered()
+ * @function   void ServerWindow::onShowMessage(int socket, char* cstr)
+ * @function   void ServerWindow::onCheckUserName(int socket, char* cname)
+ *
+ * @date       2015-03-22
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu & Eric Tsang
+ *
+ * @note       none
+ */
 #include "serverwindow.h"
 #include "ui_serverwindow.h"
 #include "dialog.h"
@@ -10,55 +41,189 @@
 #include <qmessagebox.h>
 #include <unistd.h>
 
-int port = 7000;
-int file = -1;
-QString filePath = "/";
+////////////////////////////////
+// constructors & destructors //
+////////////////////////////////
 
-
-ServerWindow::ServerWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::ServerWindow)
+/**
+ * [ServerWindow::ServerWindow description]
+ *
+ * @function   ServerWindow::ServerWindow
+ *
+ * @date       2015-03-22
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu & Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  ServerWindow::ServerWindow(QWidget *parent)
+ *
+ * @param      parent [description]
+ */
+ServerWindow::ServerWindow(QWidget *parent)
+    :QMainWindow(parent)
+    ,ui(new Ui::ServerWindow)
 {
     ui->setupUi(this);
 
-
-    /* Initial Settings */
+     // initial settings
     ui->actionDisconnect->setEnabled(false);
+
+    // initialize instance variables
+    port = 7000;
+    file = -1;
+    filePath = "./test";
 }
 
+/**
+ * [ServerWindow::ServerWindow description]
+ *
+ * @function   ServerWindow::~ServerWindow
+ *
+ * @date       2015-03-22
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu
+ *
+ * @note       none
+ *
+ * @signature  ServerWindow::~ServerWindow()
+ */
 ServerWindow::~ServerWindow()
 {
     delete ui;
 }
 
+//////////////////////
+// public interface //
+//////////////////////
 
-
-void ServerWindow::append_window_text(QString string)
-{
-    ui->textBrowser->append(string);
-}
-
-void ServerWindow::add_user(int key, QString usrName)
+/**
+ * [ServerWindow::addUserListEntry description]
+ *
+ * @function   ServerWindow::addUserListEntry
+ *
+ * @date       2015-03-22
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu & Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void ServerWindow::addUserListEntry(int key, QString usrName)
+ *
+ * @param      key [description]
+ * @param      usrName [description]
+ */
+void ServerWindow::addUserListEntry(int key, QString usrName)
 {
     QListWidgetItem* li = new QListWidgetItem(usrName);
     lis.insert(key,li);
     ui->listWidget->addItem(li);
 }
 
-void ServerWindow::rm_user(int key)
+/**
+ * [ServerWindow::rmUserListEntry description]
+ *
+ * @function   ServerWindow::rmUserListEntry
+ *
+ * @date       2015-03-22
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu & Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void ServerWindow::rmUserListEntry(int key)
+ *
+ * @param      key [description]
+ */
+void ServerWindow::rmUserListEntry(int key)
 {
     ui->listWidget->removeItemWidget(lis[key]);
     delete lis[key];
     lis.remove(key);
 }
 
+/**
+ * [ServerWindow::appendText description]
+ *
+ * @function   ServerWindow::appendText
+ *
+ * @date       2015-03-22
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu & Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void ServerWindow::appendText(char* str)
+ *
+ * @param      str [description]
+ */
+void ServerWindow::appendText(char* str)
+{
+    // append the passed text onto the screen
+    ui->textBrowser->append(QString::fromAscii(str));
+
+    // if the file is a valid file descriptor, write to the file as well
+    if(file != -1)
+    {
+        if(write(file,str,strlen(str)) == -1)
+        {
+            perror("failed on write");
+        }
+        if(write(file,"\n",1) == -1)
+        {
+            perror("failed on write");
+        }
+    }
+}
+
+//////////////////////////////////
+// Host subclass implementation //
+//////////////////////////////////
+
+/**
+ * [ServerWindow::onConnect description]
+ *
+ * @function   ServerWindow::onConnect
+ *
+ * @date       2015-03-22
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void ServerWindow::onConnect(int socket)
+ *
+ * @param      socket [description]
+ */
 void ServerWindow::onConnect(int socket)
 {
-    char buffer[1024];
-    sprintf(buffer,"socket %d connected",socket);
-    appendText(buffer);
+    Host::onConnect(socket);
 
-    // tell the new client about all connected clients
+    // tell the new client about all currently connected clients
     Net::Message newClntMsg;
     newClntMsg.type = ADD_CLIENT;
     for(auto client = lis.begin(); client != lis.end(); ++client)
@@ -72,9 +237,31 @@ void ServerWindow::onConnect(int socket)
     }
 }
 
+/**
+ * [ServerWindow::onMessage description]
+ *
+ * @function   ServerWindow::onMessage
+ *
+ * @date       2015-03-22
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void ServerWindow::onMessage(int socket, Net::Message msg)
+ *
+ * @param      socket [description]
+ * @param      msg [description]
+ */
 void ServerWindow::onMessage(int socket, Net::Message msg)
 {
     Host::onMessage(socket,msg);
+
+    // switch on message type, and call handlers
     switch(msg.type)
     {
     case SHOW_MSG:
@@ -86,14 +273,32 @@ void ServerWindow::onMessage(int socket, Net::Message msg)
     }
 }
 
+/**
+ * [ServerWindow::onDisconnect description]
+ *
+ * @function   ServerWindow::onDisconnect
+ *
+ * @date       2015-03-22
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void ServerWindow::onDisconnect(int socket, int remote)
+ *
+ * @param      socket [description]
+ * @param      remote [description]
+ */
 void ServerWindow::onDisconnect(int socket, int remote)
 {
-    char buffer[1024];
-    sprintf(buffer,"socket %d disconnected by %s host",socket,remote?"remote":"local");
-    appendText(buffer);
+    Host::onDisconnect(socket,remote);
 
     // remove the user from the list
-    rm_user(socket);
+    rmUserListEntry(socket);
 
     // iterate through remaining users, and tell them who left
     Net::Message rmClntMsg;
@@ -108,40 +313,104 @@ void ServerWindow::onDisconnect(int socket, int remote)
     }
 }
 
+//////////////////////////////////
+// callbacks triggered from GUI //
+//////////////////////////////////
+
+/**
+ * [ServerWindow::on_actionConnect_triggered description]
+ *
+ * @function   ServerWindow::on_actionConnect_triggered
+ *
+ * @date       2015-03-22
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu
+ *
+ * @note       none
+ *
+ * @signature  void ServerWindow::on_actionConnect_triggered()
+ */
 void ServerWindow::on_actionConnect_triggered()
 {
-    if (!ui->actionConnect->isChecked()){
+    if (!ui->actionConnect->isChecked())
+    {
+        // put application into a disconnected state
         on_actionDisconnect_triggered();
-    } else {
+    }
+    else
+    {
+        // put application into a connected state
         ui->actionDisconnect->setEnabled(true);
         ui->actionSettings->setEnabled(false);
         startListeningRoutine(port);
     }
 }
 
+/**
+ * [ServerWindow::on_actionDisconnect_triggered description]
+ *
+ * @function   ServerWindow::on_actionDisconnect_triggered
+ *
+ * @date       2015-03-22
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu
+ *
+ * @note       none
+ *
+ * @signature  void ServerWindow::on_actionDisconnect_triggered()
+ */
 void ServerWindow::on_actionDisconnect_triggered()
 {
+    // put application into a disconnected state
     ui->actionConnect->setChecked(false);
     ui->actionDisconnect->setEnabled(false);
     ui->actionSettings->setEnabled(true);
     stopListeningRoutine();
 }
 
+/**
+ * [ServerWindow::on_actionSettings_triggered description]
+ *
+ * @function   ServerWindow::on_actionSettings_triggered
+ *
+ * @date       2015-03-22
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu
+ *
+ * @note       none
+ *
+ * @signature  void ServerWindow::on_actionSettings_triggered()
+ */
 void ServerWindow::on_actionSettings_triggered()
 {
-    Dialog settings(this);
+    // put current settings into a structure
     Results savedResults;
     savedResults.port = port;
     savedResults.filePath = filePath;
 
+    // create and show the settings dialog
+    Dialog settings(this);
     settings.setData(savedResults);
     settings.exec();
 
+    // retrieve the user's settings
     Results passed = settings.getResults();
-
-    port = passed.port;
+    port     = passed.port;
     filePath = passed.filePath;
 
+    // open the specified file for writing
     ::close(file);
     file = open(filePath.toStdString().c_str(),O_APPEND|O_CREAT|O_WRONLY,0777);
     if(file == -1)
@@ -150,6 +419,30 @@ void ServerWindow::on_actionSettings_triggered()
     }
 }
 
+////////////////////////////////////////////////////////
+// callbacks triggered from received network messages //
+////////////////////////////////////////////////////////
+
+/**
+ * [ServerWindow::onShowMessage description]
+ *
+ * @function   ServerWindow::onShowMessage
+ *
+ * @date       2015-03-22
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu & Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void ServerWindow::onShowMessage(int socket, char* cstr)
+ *
+ * @param      socket [description]
+ * @param      cstr [description]
+ */
 void ServerWindow::onShowMessage(int socket, char* cstr)
 {
     // display the text
@@ -170,6 +463,26 @@ void ServerWindow::onShowMessage(int socket, char* cstr)
     }
 }
 
+/**
+ * [ServerWindow::onCheckUserName description]
+ *
+ * @function   ServerWindow::onCheckUserName
+ *
+ * @date       2015-03-22
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu & Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void ServerWindow::onCheckUserName(int socket, char* cname)
+ *
+ * @param      socket [description]
+ * @param      cname [description]
+ */
 void ServerWindow::onCheckUserName(int socket, char* cname)
 {
     // iterate through names, and make sure there are no collisions & reassign name if needed
@@ -191,7 +504,7 @@ void ServerWindow::onCheckUserName(int socket, char* cname)
     send(socket,newNameMsg);
 
     // add client to client list
-    add_user(socket,name);
+    addUserListEntry(socket,name);
 
     // tell all clients that a new client has connected
     Net::Message newClntMsg;
@@ -202,23 +515,5 @@ void ServerWindow::onCheckUserName(int socket, char* cname)
     {
         int currSocket = client.key();
         send(currSocket,newClntMsg);
-    }
-}
-
-void ServerWindow::appendText(char* str)
-{
-    QString qstr = str;
-    ui->textBrowser->append(qstr);
-
-    if(file != -1)
-    {
-        if(write(file,str,strlen(str)) == -1)
-        {
-            perror("failed on write");
-        }
-        if(write(file,"\n",1) == -1)
-        {
-            perror("failed on write");
-        }
     }
 }

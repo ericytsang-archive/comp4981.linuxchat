@@ -1,11 +1,24 @@
+/**
+ * [void  description]
+ *
+ * @sourceFile dialog.h
+ *
+ * @program    client
+ *
+ * @date       2015-03-22
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu
+ *
+ * @note       none
+ */
 #ifndef DIALOG_H
 #define DIALOG_H
 
 #include <QDialog>
-
-//////////////////////////
-// forward declarations //
-//////////////////////////
 
 namespace Ui {
 class Dialog;
