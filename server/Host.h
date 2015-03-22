@@ -35,6 +35,7 @@ namespace Net
         int stopListeningRoutine();
         void send(int socket, Message msg);
         int connect(char* remoteName, short remotePort);
+        void disconnect(int socket);
     protected:
         virtual void onConnect(int socket);
         virtual void onMessage(int socket, Message msg);

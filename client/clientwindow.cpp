@@ -1,3 +1,37 @@
+/**
+ * [c  description]
+ *
+ * @sourceFile clientwindow.cpp
+ *
+ * @program    client
+ *
+ * @function   ClientWindow::ClientWindow(QWidget *parent)
+ * @function   ClientWindow::~ClientWindow()
+ * @function   void ClientWindow::addUserListEntry(int key, QString usrName)
+ * @function   void ClientWindow::rmUserListEntry(int key)
+ * @function   void ClientWindow::clearUserList()
+ * @function   void ClientWindow::onConnect(int socket)
+ * @function   void ClientWindow::onMessage(int socket, Net::Message msg)
+ * @function   void ClientWindow::onDisconnect(int socket, int remote)
+ * @function   void ClientWindow::on_actionConnect_triggered()
+ * @function   void ClientWindow::on_actionDisconnect_triggered()
+ * @function   void ClientWindow::on_actionSettings_triggered()
+ * @function   void ClientWindow::on_pushButton_clicked()
+ * @function   void ClientWindow::onAddClient(int socket, char* clientName)
+ * @function   void ClientWindow::onRmClient(int socket)
+ * @function   void ClientWindow::onShowMessage(char* message)
+ * @function   void ClientWindow::onSetName(char* newUsername)
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu & Eric Tsang
+ *
+ * @note       none
+ */
 #include "clientwindow.h"
 #include "ui_clientwindow.h"
 #include "dialog.h"
@@ -11,9 +45,32 @@
 #include <qmessagebox.h>
 #include <sys/socket.h>
 
-ClientWindow::ClientWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+////////////////////////////////
+// constructors & destructors //
+////////////////////////////////
+
+/**
+ * [ClientWindow::ClientWindow description]
+ *
+ * @function   ClientWindow::ClientWindow
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu & Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  ClientWindow::ClientWindow(QWidget *parent)
+ *
+ * @param      parent [description]
+ */
+ClientWindow::ClientWindow(QWidget *parent)
+    :QMainWindow(parent)
+    ,ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
@@ -25,43 +82,144 @@ ClientWindow::ClientWindow(QWidget *parent) :
     file = -1;
     socket = -1;
     ip = "localhost";
-    name = "waifu00";
+    name = "user";
     displayName = "";
-    filePath = "/";
+    filePath = "./test";
 }
 
+/**
+ * [ClientWindow::ClientWindow description]
+ *
+ * @function   ClientWindow::~ClientWindow
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu
+ *
+ * @note       none
+ *
+ * @signature  ClientWindow::~ClientWindow()
+ */
 ClientWindow::~ClientWindow()
 {
     delete ui;
 }
 
-void ClientWindow::add_user(int key, QString usrName)
+//////////////////////
+// public interface //
+//////////////////////
+
+/**
+ * [ClientWindow::addUserListEntry description]
+ *
+ * @function   ClientWindow::addUserListEntry
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void ClientWindow::addUserListEntry(int key, QString usrName)
+ *
+ * @param      key [description]
+ * @param      usrName [description]
+ */
+void ClientWindow::addUserListEntry(int key, QString usrName)
 {
     QListWidgetItem* li = new QListWidgetItem(usrName);
     lis.insert(key,li);
     ui->listWidget->addItem(li);
 }
 
-void ClientWindow::rm_user(int key)
+/**
+ * [ClientWindow::rmUserListEntry description]
+ *
+ * @function   ClientWindow::rmUserListEntry
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void ClientWindow::rmUserListEntry(int key)
+ *
+ * @param      key [description]
+ */
+void ClientWindow::rmUserListEntry(int key)
 {
     ui->listWidget->removeItemWidget(lis[key]);
     delete lis[key];
     lis.remove(key);
 }
 
-void ClientWindow::clr_users()
+/**
+ * [ClientWindow::clearUserList description]
+ *
+ * @function   ClientWindow::clearUserList
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void ClientWindow::clearUserList()
+ */
+void ClientWindow::clearUserList()
 {
     ui->listWidget->clear();
     lis.clear();
 }
 
+//////////////////////////////////
+// Host subclass implementation //
+//////////////////////////////////
+
+/**
+ * [ClientWindow::onConnect description]
+ *
+ * @function   ClientWindow::onConnect
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void ClientWindow::onConnect(int socket)
+ *
+ * @param      socket [description]
+ */
 void ClientWindow::onConnect(int socket)
 {
-    this->socket = socket;
-    char buffer[1024];
-    sprintf(buffer,"socket %d connected",socket);
-    onShowMessage(buffer);
+    Host::onConnect(socket);
 
+    // keep a reference to the socket
+    this->socket = socket;
+
+    // send a message to the server, requesting a display name
     Net::Message msg;
     msg.type = CHECK_USR_NAME;
     msg.data = (void*)name.toStdString().c_str();
@@ -69,9 +227,30 @@ void ClientWindow::onConnect(int socket)
     Host::send(socket,msg);
 }
 
+/**
+ * [ClientWindow::onMessage description]
+ *
+ * @function   ClientWindow::onMessage
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void ClientWindow::onMessage(int socket, Net::Message msg)
+ *
+ * @param      socket [description]
+ * @param      msg [description]
+ */
 void ClientWindow::onMessage(int socket, Net::Message msg)
 {
     Host::onMessage(socket,msg);
+
     switch(msg.type)
     {
     case ADD_CLIENT:
@@ -89,14 +268,55 @@ void ClientWindow::onMessage(int socket, Net::Message msg)
     }
 }
 
+/**
+ * [ClientWindow::onDisconnect description]
+ *
+ * @function   ClientWindow::onDisconnect
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void ClientWindow::onDisconnect(int socket, int remote)
+ *
+ * @param      socket [description]
+ * @param      remote [description]
+ */
 void ClientWindow::onDisconnect(int socket, int remote)
 {
-    char buffer[1024];
-    sprintf(buffer,"socket %d disconnected by %s host",socket,remote?"remote":"local");
-    onShowMessage(buffer);
-    clr_users();
+    Host::onDisconnect(socket,remote);
+
+    // clear our user list
+    clearUserList();
 }
 
+//////////////////////////////////
+// callbacks triggered from GUI //
+//////////////////////////////////
+
+/**
+ * [ClientWindow::on_actionConnect_triggered description]
+ *
+ * @function   ClientWindow::on_actionConnect_triggered
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu
+ *
+ * @note       none
+ *
+ * @signature  void ClientWindow::on_actionConnect_triggered()
+ */
 void ClientWindow::on_actionConnect_triggered()
 {
     if (!ui->actionConnect->isChecked()){
@@ -108,14 +328,48 @@ void ClientWindow::on_actionConnect_triggered()
     }
 }
 
+/**
+ * [ClientWindow::on_actionDisconnect_triggered description]
+ *
+ * @function   ClientWindow::on_actionDisconnect_triggered
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu
+ *
+ * @note       none
+ *
+ * @signature  void ClientWindow::on_actionDisconnect_triggered()
+ */
 void ClientWindow::on_actionDisconnect_triggered()
 {
     ui->actionConnect->setChecked(false);
     ui->actionDisconnect->setEnabled(false);
     ui->actionSettings->setEnabled(true);
-    ::shutdown(this->socket,SHUT_RDWR);
+    Host::disconnect(this->socket);
 }
 
+/**
+ * [ClientWindow::on_actionSettings_triggered description]
+ *
+ * @function   ClientWindow::on_actionSettings_triggered
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu
+ *
+ * @note       none
+ *
+ * @signature  void ClientWindow::on_actionSettings_triggered()
+ */
 void ClientWindow::on_actionSettings_triggered()
 {
     Dialog settings(this);
@@ -143,6 +397,23 @@ void ClientWindow::on_actionSettings_triggered()
     }
 }
 
+/**
+ * [ClientWindow::on_pushButton_clicked description]
+ *
+ * @function   ClientWindow::on_pushButton_clicked
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu
+ *
+ * @note       none
+ *
+ * @signature  void ClientWindow::on_pushButton_clicked()
+ */
 void ClientWindow::on_pushButton_clicked()
 {
     QString chatMsg = displayName+": "+ui->textEdit->toPlainText();
@@ -157,16 +428,78 @@ void ClientWindow::on_pushButton_clicked()
     ui->textEdit->setText("");
 }
 
+////////////////////////////////////////////////////////
+// callbacks triggered from received network messages //
+////////////////////////////////////////////////////////
+
+/**
+ * [ClientWindow::onAddClient description]
+ *
+ * @function   ClientWindow::onAddClient
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu & Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void ClientWindow::onAddClient(int socket, char* clientName)
+ *
+ * @param      socket [description]
+ * @param      clientName [description]
+ */
 void ClientWindow::onAddClient(int socket, char* clientName)
 {
-    add_user(socket,QString::fromAscii(clientName));
+    addUserListEntry(socket,QString::fromAscii(clientName));
 }
 
+/**
+ * [ClientWindow::onRmClient description]
+ *
+ * @function   ClientWindow::onRmClient
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu & Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void ClientWindow::onRmClient(int socket)
+ *
+ * @param      socket [description]
+ */
 void ClientWindow::onRmClient(int socket)
 {
-    rm_user(socket);
+    rmUserListEntry(socket);
 }
 
+/**
+ * [ClientWindow::onShowMessage description]
+ *
+ * @function   ClientWindow::onShowMessage
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu & Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void ClientWindow::onShowMessage(char* message)
+ *
+ * @param      message [description]
+ */
 void ClientWindow::onShowMessage(char* message)
 {
     ui->textBrowser->append(QString::fromAscii(message));
@@ -184,6 +517,25 @@ void ClientWindow::onShowMessage(char* message)
     }
 }
 
+/**
+ * Eric Tsang
+ *
+ * @function   ClientWindow::onSetName
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @designer   Jonathan Chu
+ *
+ * @note       none
+ *
+ * @signature  void ClientWindow::onSetName(char* newUsername)
+ *
+ * @param      newUsername [description]
+ */
 void ClientWindow::onSetName(char* newUsername)
 {
     displayName = QString::fromAscii(newUsername);
