@@ -3,7 +3,7 @@
  *
  * @sourceFile dialog.h
  *
- * @program    server
+ * @program    client
  *
  * @date       2015-03-22
  *
@@ -29,6 +29,8 @@ class Dialog;
  *   with the dialog box.
  */
 struct Results {
+    QString name;
+    QString ip;
     int port;
     QString filePath;
 };

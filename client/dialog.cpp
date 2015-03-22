@@ -3,7 +3,7 @@
  *
  * @sourceFile dialog.cpp
  *
- * @program    server
+ * @program    client
  *
  * @function   Dialog::Dialog(QWidget *parent)
  * @function   Dialog::Dialog()
@@ -49,12 +49,11 @@
  *
  * @param      parent [description]
  */
-Dialog::Dialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::Dialog)
+Dialog::Dialog(QWidget *parent)
+    :QDialog(parent)
+    ,ui(new Ui::Dialog)
 {
     ui->setupUi(this);
-
 }
 
 /**
@@ -129,6 +128,8 @@ Results Dialog::getResults()
 void Dialog::setData(Results passedResults)
 {
     // save the results in case the user presses cancel
+    results.name     = passedResults.name;
+    results.ip       = passedResults.ip;
     results.port     = passedResults.port;
     results.filePath = passedResults.filePath;
 
@@ -138,8 +139,10 @@ void Dialog::setData(Results passedResults)
     QString portString = sstm.str().c_str();
 
     // set the texts of the dialog with values from passedResults
-    ui->lineEdit  ->setText(portString);
-    ui->lineEdit_2->setText(results.filePath);
+    ui->lineEdit  ->setText(results.name);
+    ui->lineEdit_2->setText(results.ip);
+    ui->lineEdit_3->setText(portString);
+    ui->lineEdit_4->setText(results.filePath);
 }
 
 ///////////////////
@@ -166,6 +169,8 @@ void Dialog::setData(Results passedResults)
 void Dialog::on_buttonBox_accepted()
 {
     // put text box contents into result structure
-    results.port     = ui->lineEdit  ->text().toInt();
-    results.filePath = ui->lineEdit_2->text();
+    results.name     = ui->lineEdit  ->text();
+    results.ip       = ui->lineEdit_2->text();
+    results.port     = ui->lineEdit_3->text().toInt();
+    results.filePath = ui->lineEdit_4->text();
 }

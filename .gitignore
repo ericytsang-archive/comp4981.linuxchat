@@ -1,3 +1,5 @@
 ~*
 *.o
 *.out
+server/build-server-Desktop-Debug/*
+client/build-client-Desktop-Debug/*

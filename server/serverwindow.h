@@ -1,34 +1,81 @@
+/**
+ * [void description]
+ *
+ * @sourceFile serverwindow.h
+ *
+ * @program    server
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Jonathan Chu & Eric Tsang
+ *
+ * @note       none
+ */
 #ifndef SERVERWINDOW_H
 #define SERVERWINDOW_H
 
+#include "Host.h"
+
 #include <QMainWindow>
 #include <QListWidgetItem>
+
+namespace Net {
+class Host;
+}
 
 namespace Ui {
 class ServerWindow;
 }
 
-class ServerWindow : public QMainWindow
+/**
+ * the {ServerWindow} handles GUI events, updates the GUI as needed, and lets
+ *   the user interact with the networking calls.
+ */
+class ServerWindow : public QMainWindow, public Net::Host
 {
     Q_OBJECT
 
 public:
     explicit ServerWindow(QWidget *parent = 0);
     ~ServerWindow();
-    void append_window_text(QString string);
-    void add_user(int key, QString usrName);
-    void rm_user(int key);
+    void addUserListEntry(int key, QString usrName);
+    void rmUserListEntry(int key);
+
+protected:
+    virtual void onConnect(int socket);
+    virtual void onMessage(int socket, Net::Message msg);
+    virtual void onDisconnect(int socket, int remote);
 
 private slots:
     void on_actionConnect_triggered();
-
     void on_actionDisconnect_triggered();
-
     void on_actionSettings_triggered();
 
 private:
+    void onShowMessage(int socket, char* cstr);
+    void onCheckUserName(int socket, char* name);
+    void appendText(char* str);
     Ui::ServerWindow *ui;
+    /**
+     * maps sockets to list items on the user list GUI widget.
+     */
     QMap<int,QListWidgetItem*> lis;
+    /**
+     * port number to listen on for connections.
+     */
+    int port;
+    /**
+     * file descriptor to a file to record chat history to.
+     */
+    int file;
+    /**
+     * path to file to record chat history to.
+     */
+    QString filePath;
 
 
 };

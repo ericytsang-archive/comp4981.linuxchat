@@ -1,6 +1,6 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2015-03-18T09:59:56
+# Project created by QtCreator 2015-03-12T10:17:37
 #
 #-------------------------------------------------
 
@@ -8,30 +8,32 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = server
+TARGET = client
 TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        serverwindow.cpp \
     dialog.cpp \
+    clientwindow.cpp \
     Host.cpp \
     net_helper.cpp \
     select_helper.cpp
 
-HEADERS  += serverwindow.h \
+HEADERS  += \
     dialog.h \
+    clientwindow.h \
     Host.h \
     Message.h \
     net_helper.h \
     protocol.h \
     select_helper.h
 
-FORMS    += serverwindow.ui \
-    dialog.ui
+FORMS    += \
+    dialog.ui \
+    clientwindow.ui
 
 RESOURCES +=
 
-DISTFILES +=
+OTHER_FILES += \
 
 QMAKE_CXXFLAGS += -std=c++11
