@@ -39,6 +39,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <qmessagebox.h>
+#include <qscrollbar.h>
 #include <unistd.h>
 
 ////////////////////////////////
@@ -181,6 +182,8 @@ void ServerWindow::appendText(char* str)
 {
     // append the passed text onto the screen
     ui->textBrowser->append(QString::fromAscii(str));
+    ui->textBrowser->verticalScrollBar()->setValue(
+        ui->textBrowser->verticalScrollBar()->maximum());
 
     // if the file is a valid file descriptor, write to the file as well
     if(file != -1)

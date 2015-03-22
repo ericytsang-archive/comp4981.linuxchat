@@ -43,6 +43,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <qmessagebox.h>
+#include <qscrollbar.h>
 #include <sys/socket.h>
 
 ////////////////////////////////
@@ -212,6 +213,8 @@ void ClientWindow::appendText(char* message)
 {
     // append the passed text onto the screen
     ui->textBrowser->append(QString::fromAscii(message));
+    ui->textBrowser->verticalScrollBar()->setValue(
+        ui->textBrowser->verticalScrollBar()->maximum());
 
     // if the file is a valid file descriptor, write to the file as well
     if(file != -1)
@@ -566,6 +569,6 @@ void ClientWindow::onSetName(char* newUsername)
 
     // show our display name to the user
     char output[1024];
-    sprintf(output,"You have joined the chat as %s.\n",newUsername);
+    sprintf(output,"You have joined the chat as %s.",newUsername);
     appendText(output);
 }
