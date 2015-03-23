@@ -1,3 +1,39 @@
+/**
+ * implementation of Host.h
+ *
+ * @sourceFile Host.cpp
+ *
+ * @program    N/A
+ *
+ * @function   Host::Host()
+ * @function   Host::~Host()
+ * @function   int Host::startListeningRoutine(short port)
+ * @function   int Host::stopListeningRoutine()
+ * @function   [some_headers_only] [class_header] [file_header]
+ * @function   int Host::connect(char* remoteName, short remotePort)
+ * @function   void Host::disconnect(int socket)
+ * @function   void Host::onConnect(int socket)
+ * @function   void Host::onMessage(int socket, Message msg)
+ * @function   void Host::onDisconnect(int socket, int remote)
+ * @function   int Host::startReceiveRoutine()
+ * @function   int Host::stopReceiveRoutine()
+ * @function   int Host::startRoutine(pthread_t* thread, void* routine, int*
+ *   controlPipe, void* params)
+ * @function   int Host::stopRoutine(pthread_t* thread, int* controlPipe)
+ * @function   void* Host::listenRoutine(void* params)
+ * @function   void* Host::receiveRoutine(void* params)
+ * @function   static void fatal_error(const char* errstr)
+ *
+ * @date       2015-03-23
+ *
+ * @revision   none
+ *
+ * @designer   Eric Tsang
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ */
 #include "Host.h"
 #include "net_helper.h"
 #include "select_helper.h"
@@ -36,7 +72,21 @@ using namespace Net;
 static void fatal_error(const char* errstr);
 
 /**
- * constructs a new {Server}.
+ * constructs a new {Host} instance.
+ *
+ * @function   Host::Host
+ *
+ * @date       2015-03-23
+ *
+ * @revision   none
+ *
+ * @designer   Eric Tsang
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  Host::Host()
  */
 Host::Host()
 {
@@ -47,20 +97,59 @@ Host::Host()
 }
 
 /**
- * Clean up the Server on destruction.
+ * cleans up the {Host} instance, and closes all connections that are connected
+ *   to the Host instance.
+ *
+ * @function   Host::~Host
+ *
+ * @date       2015-03-23
+ *
+ * @revision   none
+ *
+ * @designer   Eric Tsang
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  Host::~Host()
  */
 Host::~Host()
 {
+    stopListeningRoutine();
     stopReceiveRoutine();
 }
 
 /**
- * initializes the server to listen for incoming connections on the
- *   given port
+ * opens a new server socket, used to listen for new connections, and starts a
+ *   new thread to listen for connection requests from that socket, and accept
+ *   them.
  *
- * @param  port to connect to
+ * @function   Host::startListeningRoutine
  *
- * @return integer indicating the outcome of the operation
+ * @date       2015-03-23
+ *
+ * @revision   none
+ *
+ * @designer   Eric Tsang
+ *
+ * @programmer Eric Tsang
+ *
+ * @note
+ *
+ * returns INVALID_OPERATION when the listen thread has already started.
+ *
+ * returns SUCCESS when the server socket and listening thread are successful
+ *   opened, and started.
+ *
+ * returns SOCK_OP_FAIL when the server socket fails to open. usually due to
+ *   binding to an already in use port.
+ *
+ * @signature  int Host::startListeningRoutine(short port)
+ *
+ * @param      port port number to open the server socket on.
+ *
+ * @return     returns an integer indicating the outcome of the operation.
  */
 int Host::startListeningRoutine(short port)
 {
@@ -77,9 +166,29 @@ int Host::startListeningRoutine(short port)
 }
 
 /**
- * stops server, and closes all connections connected with the server.
+ * stops the listening thread, but this doesn't stop all accepted connections,
+ *   it just stops the listening thread, so no new connections will be accepted.
  *
- * @return 0 upon success; -1 on failure. check errno for details.
+ * @function   Host::stopListeningRoutine
+ *
+ * @date       2015-03-23
+ *
+ * @revision   none
+ *
+ * @designer   Eric Tsang
+ *
+ * @programmer Eric Tsang
+ *
+ * @note
+ *
+ * returns INVALID_OPERATION when the listening thread is already stopped, and
+ *   cannot be stopped again.
+ *
+ * returns SUCCESS when the listening thread was successfully stopped.
+ *
+ * @signature  int Host::stopListeningRoutine()
+ *
+ * @return     integer indicating the outcome of the operation.
  */
 int Host::stopListeningRoutine()
 {
@@ -87,10 +196,25 @@ int Host::stopListeningRoutine()
 }
 
 /**
- * sends a message to the remote host, using the protocol that hosts use.
+ * sends a message to the remote {Host} instance, using the protocol that {Host}
+ *   instances use.
  *
- * @param socket socket to send the data to.
- * @param msg message to send to the remote host.
+ * @function   [class_header] [method_header]
+ *
+ * @date       2015-03-23
+ *
+ * @revision   none
+ *
+ * @designer   Eric Tsang
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  [some_headers_only] [class_header] [file_header]
+ *
+ * @param      socket socket to send the data to.
+ * @param      msg message to send to the remote host.
  */
 void Host::send(int socket, Message msg)
 {
@@ -99,6 +223,36 @@ void Host::send(int socket, Message msg)
     write(socket,msg.data,msg.len);
 }
 
+/**
+ * tries to connect to a remote listening {Host} instance. this is a blocking
+ *   function that runs on the main thread. when a connection is established
+ *   with the remote host, onConnect will be invoked with the new socket created
+ *   from the connection.
+ *
+ * @function   Host::connect
+ *
+ * @date       2015-03-23
+ *
+ * @revision   none
+ *
+ * @designer   Eric Tsang
+ *
+ * @programmer Eric Tsang
+ *
+ * @note
+ *
+ * returns SUCCESS when we successfully connect to the remote {Host} instance.
+ *
+ * returns SOCK_OP_FAIL when we fail to make a connection with the remote host.
+ *
+ * @signature  int Host::connect(char* remoteName, short remotePort)
+ *
+ * @param      remoteName name of the remote host. can be dotted IP format, in
+ *   string form, or their actual name.
+ * @param      remotePort remote port number to connect to.
+ *
+ * @return     an integer indicating the outcome of the operation.
+ */
 int Host::connect(char* remoteName, short remotePort)
 {
     // connect to remote host
@@ -115,6 +269,26 @@ int Host::connect(char* remoteName, short remotePort)
     return (socket != -1) ? SUCCESS : SOCK_OP_FAIL;
 }
 
+/**
+ * communicates to the receive thread to remove an existing socket. when the
+ *   socket is disconnected, the onDisconnect callback will be invoked.
+ *
+ * @function   Host::disconnect
+ *
+ * @date       2015-03-23
+ *
+ * @revision   none
+ *
+ * @designer   Eric Tsang
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void Host::disconnect(int socket)
+ *
+ * @param      socket socket to shutdown and close.
+ */
 void Host::disconnect(int socket)
 {
     // communicate to receive thread to remove an existing socket
@@ -123,11 +297,59 @@ void Host::disconnect(int socket)
     write(receivePipe[1],&socket,sizeof(socket));
 }
 
+/**
+ * callback invoked when a new connection is established from the remote host,
+ *   or a new connection request is made on the listening socket.
+ *
+ * this implementation just prints a message that a socket has connected.
+ *
+ * @function   Host::onConnect
+ *
+ * @date       2015-03-23
+ *
+ * @revision   none
+ *
+ * @designer   Eric Tsang
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void Host::onConnect(int socket)
+ *
+ * @param      socket new socket that was created to communicate with the
+ *   connection.
+ */
 void Host::onConnect(int socket)
 {
     printf("server: socket %d connected\n",socket);
 }
 
+/**
+ * callback invoked when a new message has been received on a connection. the
+ *   received message must match the protocol that Host instances use, or this
+ *   wont work.
+ *
+ * this implementation just prints the message that was received from the remote
+ *   host, and which socket it is from.
+ *
+ * @function   Host::onMessage
+ *
+ * @date       2015-03-23
+ *
+ * @revision   none
+ *
+ * @designer   Eric Tsang
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void Host::onMessage(int socket, Message msg)
+ *
+ * @param      socket socket that the message was received from.
+ * @param      msg message structure received through the socket.
+ */
 void Host::onMessage(int socket, Message msg)
 {
     printf("server: socket %d: msg.type: %d, msg.data: ",socket,msg.type);
@@ -138,17 +360,88 @@ void Host::onMessage(int socket, Message msg)
     printf("\n");
 }
 
+/**
+ * callback invoked when a connection is terminated.
+ *
+ * this implementation just prints message that the socket was disconnected by
+ *   the remote, or local host.
+ *
+ * @function   Host::onDisconnect
+ *
+ * @date       2015-03-23
+ *
+ * @revision   none
+ *
+ * @designer   Eric Tsang
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void Host::onDisconnect(int socket, int remote)
+ *
+ * @param      socket socket that was disconnected
+ * @param      remote true if the connection was terminated by the remote host,
+ *   false otherwise.
+ */
 void Host::onDisconnect(int socket, int remote)
 {
     printf("server: socket %d disconnected by %s host\n",
         socket,remote?"remote":"local");
 }
 
+/**
+ * starts the {Host} instance's receive thread if it isn't already started.
+ *
+ * @function   Host::startReceiveRoutine
+ *
+ * @date       2015-03-23
+ *
+ * @revision   none
+ *
+ * @designer   Eric Tsang
+ *
+ * @programmer Eric Tsang
+ *
+ * @note
+ *
+ * returns SUCCESS when the receive thread is successful started.
+ *
+ * returns INVALID_OPERATION when the receive thread could not be started
+ *   because it is already started.
+ *
+ * @signature  int Host::startReceiveRoutine()
+ *
+ * @return     an integer value indicating the outcome of the operation.
+ */
 int Host::startReceiveRoutine()
 {
     return startRoutine(&receiveThread,receiveRoutine,receivePipe,this);
 }
-
+/**
+ * stops the receive routine  if it's not already stopped.
+ *
+ * @function   Host::stopReceiveRoutine
+ *
+ * @date       2015-03-23
+ *
+ * @revision   none
+ *
+ * @designer   Eric Tsang
+ *
+ * @programmer Eric Tsang
+ *
+ * @note
+ *
+ * returns INVALID_OPERATION when the listening thread is already stopped, and
+ *   cannot be stopped again.
+ *
+ * returns SUCCESS when the listening thread was successfully stopped.
+ *
+ * @signature  int Host::stopReceiveRoutine()
+ *
+ * @return     an integer indicating the outcome of the operation.
+ */
 int Host::stopReceiveRoutine()
 {
     return stopRoutine(&receiveThread,receivePipe);
@@ -168,7 +461,12 @@ int Host::stopReceiveRoutine()
  *
  * @programmer EricTsang
  *
- * @note       none
+ * @note
+ *
+ * returns SUCCESS when the receive thread is successful started.
+ *
+ * returns INVALID_OPERATION when the receive thread could not be started
+ *   because it is already started.
  *
  * @signature  int Host::startRoutine(pthread_t* thread, void* routine, int*
  *   controlPipe, void* params)
@@ -179,9 +477,10 @@ int Host::stopReceiveRoutine()
  *   of a unnamed FIFO unnamed pipe.
  * @param      params parameters to pass to the new thread.
  *
- * @return     [file_header] [class_header] [description]
+ * @return     an integer indicating the outcome of the operation.
  */
-int Host::startRoutine(pthread_t* thread, void*(*routine)(void*), int* controlPipe, void* params)
+int Host::startRoutine(pthread_t* thread, void*(*routine)(void*),
+    int* controlPipe, void* params)
 {
     // return immediately if the routine is already running
     if(*thread != 0)
@@ -214,7 +513,12 @@ int Host::startRoutine(pthread_t* thread, void*(*routine)(void*), int* controlPi
  *
  * @programmer EricTsang
  *
- * @note       none
+ * @note
+ *
+ * returns INVALID_OPERATION when the listening thread is already stopped, and
+ *   cannot be stopped again.
+ *
+ * returns SUCCESS when the listening thread was successfully stopped.
  *
  * @signature  int Host::stopRoutine(pthread_t* thread, int* controlPipe)
  *
@@ -242,9 +546,25 @@ int Host::stopRoutine(pthread_t* thread, int* controlPipe)
 }
 
 /**
- * function run on a thread. it polls the server socket, accepting connections.
+ * function run on a thread. it polls the server socket, and a control pipe,
+ *   accepting connections, and waiting for further commands from the control
+ *   pipe.
  *
- * @param params thread parameters; points to the calling server instance.
+ * @function   Host::listenRoutine
+ *
+ * @date       2015-03-23
+ *
+ * @revision   none
+ *
+ * @designer   Eric Tsang
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void* Host::listenRoutine(void* params)
+ *
+ * @param      params pointer to the {Host} instance the thread belongs to.
  */
 void* Host::listenRoutine(void* params)
 {
@@ -339,6 +659,26 @@ void* Host::listenRoutine(void* params)
     return 0;
 }
 
+/**
+ * function run on a thread. it polls a set of connected sockets, and a control
+ *   pipe.
+ *
+ * @function   Host::receiveRoutine
+ *
+ * @date       2015-03-23
+ *
+ * @revision   none
+ *
+ * @designer   Eric Tsang
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void* Host::receiveRoutine(void* params)
+ *
+ * @param      params pointer to the {Host} instance the thread belongs to.
+ */
 void* Host::receiveRoutine(void* params)
 {
     printf("receiveroutine started...\n");
@@ -482,6 +822,25 @@ void* Host::receiveRoutine(void* params)
     return 0;
 }
 
+/**
+ * prints the the passed string, and then exits the process.
+ *
+ * @function   fatal_error
+ *
+ * @date       2015-03-23
+ *
+ * @revision   none
+ *
+ * @designer   Eric Tsang
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  static void fatal_error(const char* errstr)
+ *
+ * @param      errstr string to print using perror before exiting the process.
+ */
 static void fatal_error(const char* errstr)
 {
     perror(errstr);
