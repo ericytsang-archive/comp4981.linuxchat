@@ -19,6 +19,7 @@
 #define CLIENTWINDOW_H
 
 #include "Host.h"
+#include "Message.h"
 
 #include <QMainWindow>
 #include <QListWidgetItem>
@@ -54,7 +55,15 @@ protected:
     virtual void onMessage(int socket, Net::Message msg);
     virtual void onDisconnect(int socket, int remote);
 
-private slots:
+signals:
+    void sigConnect(int socket);
+    void sigMessage(int socket, Net::Message msg);
+    void sigDisconnect(int socket, int remote);
+
+public slots:
+    void slot_connect(int socket);
+    void slot_message(int socket, Net::Message msg);
+    void slot_disconnect(int socket, int remote);
     void on_actionConnect_triggered();
     void on_actionDisconnect_triggered();
     void on_actionSettings_triggered();
