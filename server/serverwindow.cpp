@@ -1,5 +1,6 @@
 /**
- * [void description]
+ * The server window that is being created as well
+ * as all the functions that involves the server.
  *
  * @sourceFile serverwindow.cpp
  *
@@ -47,7 +48,8 @@
 ////////////////////////////////
 
 /**
- * [ServerWindow::ServerWindow description]
+ * the server window constructor as well as initial settings for data as well
+ * as gui elements
  *
  * @function   ServerWindow::ServerWindow
  *
@@ -63,7 +65,7 @@
  *
  * @signature  ServerWindow::ServerWindow(QWidget *parent)
  *
- * @param      parent [description]
+ * @param      parent
  */
 ServerWindow::ServerWindow(QWidget *parent)
     :QMainWindow(parent)
@@ -91,7 +93,7 @@ ServerWindow::ServerWindow(QWidget *parent)
 }
 
 /**
- * [ServerWindow::ServerWindow description]
+ * server window destructor
  *
  * @function   ServerWindow::~ServerWindow
  *
@@ -117,7 +119,7 @@ ServerWindow::~ServerWindow()
 //////////////////////
 
 /**
- * [ServerWindow::addUserListEntry description]
+ * add an entry to the qlistwidget
  *
  * @function   ServerWindow::addUserListEntry
  *
@@ -133,8 +135,8 @@ ServerWindow::~ServerWindow()
  *
  * @signature  void ServerWindow::addUserListEntry(int key, QString usrName)
  *
- * @param      key [description]
- * @param      usrName [description]
+ * @param      key the id of the user
+ * @param      usrName the name of the username
  */
 void ServerWindow::addUserListEntry(int key, QString usrName)
 {
@@ -144,7 +146,7 @@ void ServerWindow::addUserListEntry(int key, QString usrName)
 }
 
 /**
- * [ServerWindow::rmUserListEntry description]
+ * removes the user from the qlistwidget
  *
  * @function   ServerWindow::rmUserListEntry
  *
@@ -160,7 +162,7 @@ void ServerWindow::addUserListEntry(int key, QString usrName)
  *
  * @signature  void ServerWindow::rmUserListEntry(int key)
  *
- * @param      key [description]
+ * @param      key the id of the user
  */
 void ServerWindow::rmUserListEntry(int key)
 {
@@ -170,7 +172,7 @@ void ServerWindow::rmUserListEntry(int key)
 }
 
 /**
- * [ServerWindow::appendText description]
+ * appends all the information that is being received by the clients
  *
  * @function   ServerWindow::appendText
  *
@@ -186,7 +188,7 @@ void ServerWindow::rmUserListEntry(int key)
  *
  * @signature  void ServerWindow::appendText(char* str)
  *
- * @param      str [description]
+ * @param      str the message to be appended on the display
  */
 void ServerWindow::appendText(char* str)
 {
@@ -214,32 +216,12 @@ void ServerWindow::appendText(char* str)
 //////////////////////////////////
 // Host subclass implementation //
 //////////////////////////////////
-
-void ServerWindow::onConnect(int socket)
-{
-    emit(sigConnect(socket));
-}
-
-void ServerWindow::onMessage(int socket, Net::Message msg)
-{
-    emit(sigMessage(socket,msg));
-}
-
-void ServerWindow::onDisconnect(int socket, int remote)
-{
-    emit(sigDisconnect(socket,remote));
-}
-
-//////////////////////////////////
-// callbacks triggered from GUI //
-//////////////////////////////////
-
 /**
- * [ServerWindow::onConnect description]
+ * Callback that is called when a new connection is established
  *
  * @function   ServerWindow::onConnect
  *
- * @date       2015-03-22
+ * @date       2015-03-21
  *
  * @revision   none
  *
@@ -251,7 +233,84 @@ void ServerWindow::onDisconnect(int socket, int remote)
  *
  * @signature  void ServerWindow::onConnect(int socket)
  *
- * @param      socket [description]
+ * @param      socket the socket that is being connected to
+ */
+void ServerWindow::onConnect(int socket)
+{
+    emit(sigConnect(socket));
+}
+
+/**
+ * Callback that is called when a new message is received
+ *
+ * @function   ServerWindow::onMessage
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void ServerWindow::onMessage(int socket, Net::Message msg)
+ *
+ * @param      socket socket which message was sent from
+ *             msg the message
+ */
+void ServerWindow::onMessage(int socket, Net::Message msg)
+{
+    emit(sigMessage(socket,msg));
+}
+/**
+ * Callback that is called when it disconnects
+ *
+ * @function   ServerWindow::onDisconnect
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void ServerWindow::onDisconnect(int socket, int remote)
+ *
+ * @param      socket the socket that is to be disconnnected
+ *             remote a boolean where its zero or one depending on who terminated the connection
+ */
+void ServerWindow::onDisconnect(int socket, int remote)
+{
+    emit(sigDisconnect(socket,remote));
+}
+
+//////////////////////////////////
+// callbacks triggered from GUI //
+//////////////////////////////////
+
+/**
+ * invoked by onConnect
+ *
+ * @function   ServerWindow::slot_connect()
+ *
+ * @date       2015-03-22
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void ServerWindow::slot_connect(int socket)
+ *
+ * @param      socket the socket
  */
 void ServerWindow::slot_connect(int socket)
 {
@@ -279,9 +338,9 @@ void ServerWindow::slot_connect(int socket)
 }
 
 /**
- * [ServerWindow::onMessage description]
+ * invoked by onMessage
  *
- * @function   ServerWindow::onMessage
+ * @function   ServerWindow::slot_message
  *
  * @date       2015-03-22
  *
@@ -293,10 +352,10 @@ void ServerWindow::slot_connect(int socket)
  *
  * @note       none
  *
- * @signature  void ServerWindow::onMessage(int socket, Net::Message msg)
+ * @signature  void ServerWindow::slot_message(int socket, Net::Message msg)
  *
- * @param      socket [description]
- * @param      msg [description]
+ * @param      socket the slot
+ * @param      msg the message received
  */
 void ServerWindow::slot_message(int socket, Net::Message msg)
 {
@@ -319,7 +378,7 @@ void ServerWindow::slot_message(int socket, Net::Message msg)
 /**
  * [ServerWindow::onDisconnect description]
  *
- * @function   ServerWindow::onDisconnect
+ * @function   ServerWindow::slot_disconnect
  *
  * @date       2015-03-22
  *
@@ -331,10 +390,10 @@ void ServerWindow::slot_message(int socket, Net::Message msg)
  *
  * @note       none
  *
- * @signature  void ServerWindow::onDisconnect(int socket, int remote)
+ * @signature  void ServerWindow::slot_disconnect(int socket, int remote)
  *
- * @param      socket [description]
- * @param      remote [description]
+ * @param      socket the socket
+ * @param      remote boolean where its zero or one depending on who terminated the connection
  */
 void ServerWindow::slot_disconnect(int socket, int remote)
 {
@@ -357,7 +416,9 @@ void ServerWindow::slot_disconnect(int socket, int remote)
 }
 
 /**
- * [ServerWindow::on_actionConnect_triggered description]
+ * The connect button sets all the other tabs to their
+ * corresponding state and connects to the server or disconnects
+ * if it is toggled
  *
  * @function   ServerWindow::on_actionConnect_triggered
  *
@@ -398,7 +459,8 @@ void ServerWindow::on_actionConnect_triggered()
 }
 
 /**
- * [ServerWindow::on_actionDisconnect_triggered description]
+ * The disconnect button disconnects from the server and updates
+ * all the states.
  *
  * @function   ServerWindow::on_actionDisconnect_triggered
  *
@@ -424,7 +486,8 @@ void ServerWindow::on_actionDisconnect_triggered()
 }
 
 /**
- * [ServerWindow::on_actionSettings_triggered description]
+ * Pops up the new window which is a dialog that contains
+ * the settings for the connection.
  *
  * @function   ServerWindow::on_actionSettings_triggered
  *
@@ -471,7 +534,8 @@ void ServerWindow::on_actionSettings_triggered()
 ////////////////////////////////////////////////////////
 
 /**
- * [ServerWindow::onShowMessage description]
+ * when message is received from a client, it appens it
+ * to the display gui element
  *
  * @function   ServerWindow::onShowMessage
  *
@@ -487,8 +551,8 @@ void ServerWindow::on_actionSettings_triggered()
  *
  * @signature  void ServerWindow::onShowMessage(int socket, char* cstr)
  *
- * @param      socket [description]
- * @param      cstr [description]
+ * @param      socket the socket it came from
+ * @param      cstr the message to be appended
  */
 void ServerWindow::onShowMessage(int socket, char* cstr)
 {
@@ -511,7 +575,7 @@ void ServerWindow::onShowMessage(int socket, char* cstr)
 }
 
 /**
- * [ServerWindow::onCheckUserName description]
+ * check if the username is already taken
  *
  * @function   ServerWindow::onCheckUserName
  *
@@ -527,8 +591,8 @@ void ServerWindow::onShowMessage(int socket, char* cstr)
  *
  * @signature  void ServerWindow::onCheckUserName(int socket, char* cname)
  *
- * @param      socket [description]
- * @param      cname [description]
+ * @param      socket the socket the user is using
+ * @param      cname the requested name
  */
 void ServerWindow::onCheckUserName(int socket, char* cname)
 {

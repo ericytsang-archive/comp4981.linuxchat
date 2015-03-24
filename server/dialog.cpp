@@ -1,5 +1,6 @@
 /**
- * [ovi description]
+ * the dialog that creates a window for the setting for the
+ * server and saves the data to be applied by the server window
  *
  * @sourceFile dialog.cpp
  *
@@ -31,7 +32,7 @@
 ////////////////////////////////
 
 /**
- * [Dialog::Dialog description]
+ * the constructor that creates the dialog window
  *
  * @function   Dialog::Dialog
  *
@@ -47,7 +48,7 @@
  *
  * @signature  Dialog::Dialog(QWidget *parent)
  *
- * @param      parent [description]
+ * @param      parent
  */
 Dialog::Dialog(QWidget *parent) :
     QDialog(parent),
@@ -58,7 +59,7 @@ Dialog::Dialog(QWidget *parent) :
 }
 
 /**
- * [Dialog::Dialog description]
+ * the destructor for the dialog window
  *
  * @function   Dialog::~Dialog
  *
@@ -84,7 +85,8 @@ Dialog::~Dialog()
 //////////////////////
 
 /**
- * [Dialog::getResults description]
+ * function used by server window to obtain data
+ * from the dialog window saved on a struct
  *
  * @function   Dialog::getResults
  *
@@ -100,7 +102,7 @@ Dialog::~Dialog()
  *
  * @signature  Results Dialog::getResults()
  *
- * @return     [file_header] [class_header] [description]
+ * @return     results struct containing the data from the settings
  */
 Results Dialog::getResults()
 {
@@ -108,7 +110,7 @@ Results Dialog::getResults()
 }
 
 /**
- * [Dialog::setData description]
+ * sets the data of the struct that contains the information
  *
  * @function   Dialog::setData
  *
@@ -124,7 +126,7 @@ Results Dialog::getResults()
  *
  * @signature  void Dialog::setData(Results passedResults)
  *
- * @param      passedResults [description]
+ * @param      passedResults the previous setting
  */
 void Dialog::setData(Results passedResults)
 {
@@ -147,7 +149,7 @@ void Dialog::setData(Results passedResults)
 ///////////////////
 
 /**
- * [Dialog::on_buttonBox_accepted description]
+ * saves the changes in settings once the accept button is pressed
  *
  * @function   Dialog::on_buttonBox_accepted
  *

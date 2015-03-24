@@ -1,5 +1,6 @@
 /**
- * [void  description]
+ * the dialog header that contains all related
+ * to the settings tab
  *
  * @sourceFile dialog.h
  *

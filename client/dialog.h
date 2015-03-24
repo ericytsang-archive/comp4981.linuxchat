@@ -1,5 +1,6 @@
 /**
- * [void  description]
+ * the headers for the dialog where the settings
+ * window comes from
  *
  * @sourceFile dialog.h
  *

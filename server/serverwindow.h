@@ -1,5 +1,6 @@
 /**
- * [void description]
+ * the header containing all functions related
+ * to the server window.
  *
  * @sourceFile serverwindow.h
  *
