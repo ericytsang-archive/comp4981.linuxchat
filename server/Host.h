@@ -1,3 +1,20 @@
+/**
+ * declares the interface of he {Host} instance.
+ *
+ * @sourceFile Host.h
+ *
+ * @program    N/A
+ *
+ * @date       2015-03-23
+ *
+ * @revision   none
+ *
+ * @designer   Eric Tsang
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ */
 #ifndef SERVER_H_
 #define SERVER_H_
 
@@ -26,6 +43,11 @@ namespace Net
 {
     struct Message;
 
+    /**
+     * a {Host} instance is used to make connections with other application over
+     *   the network on the Linux platforms, and provides overridable callback
+     *   methods that can be used to easily customize its functionality.
+     */
     class Host
     {
     public:
@@ -43,7 +65,8 @@ namespace Net
     private:
         int startReceiveRoutine();
         int stopReceiveRoutine();
-        int startRoutine(pthread_t* thread, void*(*routine)(void*), int* controlPipe, void* params);
+        int startRoutine(pthread_t* thread, void*(*routine)(void*),
+            int* controlPipe, void* params);
         int stopRoutine(pthread_t* thread, int* controlPipe);
         static void* listenRoutine(void* params);
         static void* receiveRoutine(void* params);

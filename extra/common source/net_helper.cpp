@@ -1,3 +1,28 @@
+/**
+ * implementation of net_helper.h
+ *
+ * @sourceFile net_helper.cpp
+ *
+ * @program    N/A
+ *
+ * @function   int make_tcp_server_socket(short port)
+ * @function   int make_tcp_client_socket(char* remoteName, long remoteAddr,
+ *   short remotePort, short localPort)
+ * @function   struct sockaddr make_sockaddr(char* hostName, long hostAddr,
+ *   short hostPort)
+ * @function   int read_file(int socket, void* buffer, int bytesToRead)
+ * @function   static void fatal_error(const char* errstr)
+ *
+ * @date       2015-03-23
+ *
+ * @revision   none
+ *
+ * @designer   Eric Tsang
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ */
 #include "net_helper.h"
 
 #include <stdio.h>
@@ -99,7 +124,8 @@ int make_tcp_server_socket(short port)
  * @return     socket file descriptor to the new connected client socket. may
  *   return -1 on error.
  */
-int make_tcp_client_socket(char* remoteName, long remoteAddr, short remotePort, short localPort)
+int make_tcp_client_socket(char* remoteName, long remoteAddr, short remotePort,
+    short localPort)
 {
     // local address that client socket is bound to
     struct sockaddr local;
@@ -156,7 +182,8 @@ int make_tcp_client_socket(char* remoteName, long remoteAddr, short remotePort, 
  *
  * @note       none
  *
- * @signature  struct sockaddr make_sockaddr(char* hostName, long hostAddr, short hostPort)
+ * @signature  struct sockaddr make_sockaddr(char* hostName, long hostAddr,
+ *   short hostPort)
  *
  * @param      hostName optional. name of the remote host. either this, or
  *   {hostAddr} must be specified.
