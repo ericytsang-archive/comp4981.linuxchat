@@ -1,5 +1,6 @@
 /**
- * [void description]
+ * The header for the client window where the
+ * client chat is created
  *
  * @sourceFile clientwindow.h
  *

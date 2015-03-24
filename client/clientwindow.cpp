@@ -1,5 +1,6 @@
 /**
- * [c  description]
+ * The client chat window will be created as well as
+ * all the functions that it deals with it.
  *
  * @sourceFile clientwindow.cpp
  *
@@ -51,7 +52,8 @@
 ////////////////////////////////
 
 /**
- * [ClientWindow::ClientWindow description]
+ *client window constructor that sets some gui behaviorus as
+ * well as the default settings for the client.
  *
  * @function   ClientWindow::ClientWindow
  *
@@ -67,7 +69,7 @@
  *
  * @signature  ClientWindow::ClientWindow(QWidget *parent)
  *
- * @param      parent [description]
+ * @param      parent
  */
 ClientWindow::ClientWindow(QWidget *parent)
     :QMainWindow(parent)
@@ -99,7 +101,7 @@ ClientWindow::ClientWindow(QWidget *parent)
 }
 
 /**
- * [ClientWindow::ClientWindow description]
+ * The clientwindow destructor
  *
  * @function   ClientWindow::~ClientWindow
  *
@@ -125,7 +127,8 @@ ClientWindow::~ClientWindow()
 //////////////////////
 
 /**
- * [ClientWindow::addUserListEntry description]
+ * Adds a user to the qlistwidget, which is the list of
+ * users that are online
  *
  * @function   ClientWindow::addUserListEntry
  *
@@ -141,8 +144,8 @@ ClientWindow::~ClientWindow()
  *
  * @signature  void ClientWindow::addUserListEntry(int key, QString usrName)
  *
- * @param      key [description]
- * @param      usrName [description]
+ * @param      key the id of the user that is to be added
+ * @param      usrName the name of the user that is being added
  */
 void ClientWindow::addUserListEntry(int key, QString usrName)
 {
@@ -152,7 +155,7 @@ void ClientWindow::addUserListEntry(int key, QString usrName)
 }
 
 /**
- * [ClientWindow::rmUserListEntry description]
+ * Removes a user from the qlistwidget
  *
  * @function   ClientWindow::rmUserListEntry
  *
@@ -168,7 +171,7 @@ void ClientWindow::addUserListEntry(int key, QString usrName)
  *
  * @signature  void ClientWindow::rmUserListEntry(int key)
  *
- * @param      key [description]
+ * @param      key the id of the user to be removed
  */
 void ClientWindow::rmUserListEntry(int key)
 {
@@ -178,7 +181,7 @@ void ClientWindow::rmUserListEntry(int key)
 }
 
 /**
- * [ClientWindow::clearUserList description]
+ * removes all entries from the qlistwidget
  *
  * @function   ClientWindow::clearUserList
  *
@@ -201,7 +204,7 @@ void ClientWindow::clearUserList()
 }
 
 /**
- * [ClientWindow::appendText description]
+ * Appends the text that is being given to the display
  *
  * @function   ClientWindow::appendText
  *
@@ -217,7 +220,7 @@ void ClientWindow::clearUserList()
  *
  * @signature  void ClientWindow::appendText(char* message)
  *
- * @param      message [description]
+ * @param      message message to be appended
  */
 void ClientWindow::appendText(char* message)
 {
@@ -245,28 +248,8 @@ void ClientWindow::appendText(char* message)
 //////////////////////////////////
 // Host subclass implementation //
 //////////////////////////////////
-
-void ClientWindow::onConnect(int socket)
-{
-    emit(sigConnect(socket));
-}
-
-void ClientWindow::onMessage(int socket, Net::Message msg)
-{
-    emit(sigMessage(socket,msg));
-}
-
-void ClientWindow::onDisconnect(int socket, int remote)
-{
-    emit(sigDisconnect(socket,remote));
-}
-
-//////////////////////////////////
-// callbacks triggered from GUI //
-//////////////////////////////////
-
 /**
- * [ClientWindow::onConnect description]
+ * Callback that is called when a new connection is established
  *
  * @function   ClientWindow::onConnect
  *
@@ -282,7 +265,85 @@ void ClientWindow::onDisconnect(int socket, int remote)
  *
  * @signature  void ClientWindow::onConnect(int socket)
  *
- * @param      socket [description]
+ * @param      socket the socket that is being connected to
+ */
+void ClientWindow::onConnect(int socket)
+{
+    emit(sigConnect(socket));
+}
+
+/**
+ * Callback that is called when a new message is received
+ *
+ * @function   ClientWindow::onMessage
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void ClientWindow::onMessage(int socket, Net::Message msg)
+ *
+ * @param      socket socket which message was sent from
+ *             msg the message
+ */
+void ClientWindow::onMessage(int socket, Net::Message msg)
+{
+    emit(sigMessage(socket,msg));
+}
+
+/**
+ * Callback that is called when it disconnects
+ *
+ * @function   ClientWindow::onDisconnect
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void ClientWindow::onDisconnect(int socket, int remote)
+ *
+ * @param      socket the socket that is to be disconnnected
+ *             remote a boolean where its zero or one depending on who terminated the connection
+ */
+void ClientWindow::onDisconnect(int socket, int remote)
+{
+    emit(sigDisconnect(socket,remote));
+}
+
+//////////////////////////////////
+// callbacks triggered from GUI //
+//////////////////////////////////
+
+/**
+ * Invoked by onConnect
+ *
+ * @function   ClientWindow::slot_connect
+ *
+ * @date       2015-03-21
+ *
+ * @revision   none
+ *
+ * @designer   Jonathan Chu
+ *
+ * @programmer Eric Tsang
+ *
+ * @note       none
+ *
+ * @signature  void ClientWindow::slot_connect(int socket)
+ *
+ * @param      socket the socket
  */
 void ClientWindow::slot_connect(int socket)
 {
@@ -300,7 +361,7 @@ void ClientWindow::slot_connect(int socket)
 }
 
 /**
- * [ClientWindow::onMessage description]
+ * invoked by onMessage
  *
  * @function   ClientWindow::onMessage
  *
@@ -316,8 +377,8 @@ void ClientWindow::slot_connect(int socket)
  *
  * @signature  void ClientWindow::onMessage(int socket, Net::Message msg)
  *
- * @param      socket [description]
- * @param      msg [description]
+ * @param      socket the socket
+ * @param      msg the message sent
  */
 void ClientWindow::slot_message(int socket, Net::Message msg)
 {
@@ -344,7 +405,7 @@ void ClientWindow::slot_message(int socket, Net::Message msg)
 }
 
 /**
- * [ClientWindow::onDisconnect description]
+ * invoked by onDisconnect
  *
  * @function   ClientWindow::onDisconnect
  *
@@ -360,8 +421,8 @@ void ClientWindow::slot_message(int socket, Net::Message msg)
  *
  * @signature  void ClientWindow::onDisconnect(int socket, int remote)
  *
- * @param      socket [description]
- * @param      remote [description]
+ * @param      socket the socket
+ * @param      remote boolean where its zero or one depending on who terminated the connection
  */
 void ClientWindow::slot_disconnect(int socket, int remote)
 {
@@ -376,7 +437,9 @@ void ClientWindow::slot_disconnect(int socket, int remote)
 //////////////////////////////////
 
 /**
- * [ClientWindow::on_actionConnect_triggered description]
+ * The connect button sets all the other tabs to their
+ * corresponding state and connects to the server or disconnects
+ * if it is toggled
  *
  * @function   ClientWindow::on_actionConnect_triggered
  *
@@ -417,7 +480,8 @@ void ClientWindow::on_actionConnect_triggered()
 }
 
 /**
- * [ClientWindow::on_actionDisconnect_triggered description]
+ * The disconnect button disconnects from the server and updates
+ * all the states.
  *
  * @function   ClientWindow::on_actionDisconnect_triggered
  *
@@ -443,7 +507,8 @@ void ClientWindow::on_actionDisconnect_triggered()
 }
 
 /**
- * [ClientWindow::on_actionSettings_triggered description]
+ * Pops up the new window which is a dialog that contains
+ * the settings for the connection.
  *
  * @function   ClientWindow::on_actionSettings_triggered
  *
@@ -490,7 +555,9 @@ void ClientWindow::on_actionSettings_triggered()
 }
 
 /**
- * [ClientWindow::on_pushButton_clicked description]
+ * The send button which will gather the message to be sent and writes it to the
+ * screen and send the same data with the username to the server to update
+ * the other clients as well as the server
  *
  * @function   ClientWindow::on_pushButton_clicked
  *
@@ -528,7 +595,7 @@ void ClientWindow::on_pushButton_clicked()
 ////////////////////////////////////////////////////////
 
 /**
- * [ClientWindow::onAddClient description]
+ * add a client to the server
  *
  * @function   ClientWindow::onAddClient
  *
@@ -544,8 +611,8 @@ void ClientWindow::on_pushButton_clicked()
  *
  * @signature  void ClientWindow::onAddClient(int socket, char* clientName)
  *
- * @param      socket [description]
- * @param      clientName [description]
+ * @param      socket the socket being used
+ * @param      clientName the name of the client that was specified
  */
 void ClientWindow::onAddClient(int socket, char* clientName)
 {
@@ -553,7 +620,7 @@ void ClientWindow::onAddClient(int socket, char* clientName)
 }
 
 /**
- * [ClientWindow::onRmClient description]
+ * removes a client from the server.
  *
  * @function   ClientWindow::onRmClient
  *
@@ -569,7 +636,7 @@ void ClientWindow::onAddClient(int socket, char* clientName)
  *
  * @signature  void ClientWindow::onRmClient(int socket)
  *
- * @param      socket [description]
+ * @param      socket the socket that is being used by the client
  */
 void ClientWindow::onRmClient(int socket)
 {
@@ -577,7 +644,8 @@ void ClientWindow::onRmClient(int socket)
 }
 
 /**
- * Eric Tsang
+ * sets the user's display name as well as display a message
+ *  that will tell the user that he has connected successfully
  *
  * @function   ClientWindow::onSetName
  *
@@ -593,7 +661,7 @@ void ClientWindow::onRmClient(int socket)
  *
  * @signature  void ClientWindow::onSetName(char* newUsername)
  *
- * @param      newUsername [description]
+ * @param      newUsername the username for the user
  */
 void ClientWindow::onSetName(char* newUsername)
 {

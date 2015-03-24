@@ -1,5 +1,6 @@
 /**
- * [ovi description]
+ * The dialog that will be used as
+ * the settings in the chat program.
  *
  * @sourceFile dialog.cpp
  *
@@ -31,7 +32,7 @@
 ////////////////////////////////
 
 /**
- * [Dialog::Dialog description]
+ * The dialog constructor that creates the window
  *
  * @function   Dialog::Dialog
  *
@@ -57,7 +58,8 @@ Dialog::Dialog(QWidget *parent)
 }
 
 /**
- * [Dialog::Dialog description]
+ * The dialog destructor that cleans up
+ * when the window is closed or done with.
  *
  * @function   Dialog::~Dialog
  *
@@ -83,7 +85,9 @@ Dialog::~Dialog()
 //////////////////////
 
 /**
- * [Dialog::getResults description]
+ * this function is used by the main window in order
+ * to retrieve the information that was collected
+ * by the settings.
  *
  * @function   Dialog::getResults
  *
@@ -99,7 +103,7 @@ Dialog::~Dialog()
  *
  * @signature  Results Dialog::getResults()
  *
- * @return     [file_header] [class_header] [description]
+ * @return     resuts the struc containing all the data important for the main window
  */
 Results Dialog::getResults()
 {
@@ -107,7 +111,8 @@ Results Dialog::getResults()
 }
 
 /**
- * [Dialog::setData description]
+ * Sets the data that is being passed onto the settings so that
+ * the previous settings are persistent.
  *
  * @function   Dialog::setData
  *
@@ -123,7 +128,7 @@ Results Dialog::getResults()
  *
  * @signature  void Dialog::setData(Results passedResults)
  *
- * @param      passedResults [description]
+ * @param      passedResults the previous settings
  */
 void Dialog::setData(Results passedResults)
 {
@@ -150,7 +155,8 @@ void Dialog::setData(Results passedResults)
 ///////////////////
 
 /**
- * [Dialog::on_buttonBox_accepted description]
+ * The behaviour that is required when the
+ * confirmation button has been pressed.
  *
  * @function   Dialog::on_buttonBox_accepted
  *
