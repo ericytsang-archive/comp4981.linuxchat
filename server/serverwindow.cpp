@@ -78,6 +78,16 @@ ServerWindow::ServerWindow(QWidget *parent)
     port = 7000;
     file = -1;
     filePath = "./test";
+
+    // connect signals to slots
+    qRegisterMetaType<Net::Message>();
+    qRegisterMetaType<int>();
+    QObject::connect(this,SIGNAL(sigConnect(int)),
+                     this,SLOT(slot_connect(int)));
+    QObject::connect(this,SIGNAL(sigMessage(int,Net::Message)),
+                     this,SLOT(slot_message(int,Net::Message)));
+    QObject::connect(this,SIGNAL(sigDisconnect(int,int)),
+                     this,SLOT(slot_disconnect(int,int)));
 }
 
 /**
@@ -205,6 +215,25 @@ void ServerWindow::appendText(char* str)
 // Host subclass implementation //
 //////////////////////////////////
 
+void ServerWindow::onConnect(int socket)
+{
+    emit(sigConnect(socket));
+}
+
+void ServerWindow::onMessage(int socket, Net::Message msg)
+{
+    emit(sigMessage(socket,msg));
+}
+
+void ServerWindow::onDisconnect(int socket, int remote)
+{
+    emit(sigDisconnect(socket,remote));
+}
+
+//////////////////////////////////
+// callbacks triggered from GUI //
+//////////////////////////////////
+
 /**
  * [ServerWindow::onConnect description]
  *
@@ -224,7 +253,7 @@ void ServerWindow::appendText(char* str)
  *
  * @param      socket [description]
  */
-void ServerWindow::onConnect(int socket)
+void ServerWindow::slot_connect(int socket)
 {
     Host::onConnect(socket);
 
@@ -261,7 +290,7 @@ void ServerWindow::onConnect(int socket)
  * @param      socket [description]
  * @param      msg [description]
  */
-void ServerWindow::onMessage(int socket, Net::Message msg)
+void ServerWindow::slot_message(int socket, Net::Message msg)
 {
     Host::onMessage(socket,msg);
 
@@ -275,6 +304,8 @@ void ServerWindow::onMessage(int socket, Net::Message msg)
         onCheckUserName(socket,(char*)msg.data);
         break;
     }
+
+    free(msg.data);
 }
 
 /**
@@ -297,7 +328,7 @@ void ServerWindow::onMessage(int socket, Net::Message msg)
  * @param      socket [description]
  * @param      remote [description]
  */
-void ServerWindow::onDisconnect(int socket, int remote)
+void ServerWindow::slot_disconnect(int socket, int remote)
 {
     Host::onDisconnect(socket,remote);
 
@@ -316,10 +347,6 @@ void ServerWindow::onDisconnect(int socket, int remote)
         send(currSocket,rmClntMsg);
     }
 }
-
-//////////////////////////////////
-// callbacks triggered from GUI //
-//////////////////////////////////
 
 /**
  * [ServerWindow::on_actionConnect_triggered description]

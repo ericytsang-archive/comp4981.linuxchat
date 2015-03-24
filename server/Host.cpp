@@ -797,7 +797,7 @@ void* Host::receiveRoutine(void* params)
 
                     dis->onMessage(curSock,msg);
 
-                    free(buffer);
+                    //free(buffer);
                 }
                 break;
             }

@@ -18,6 +18,8 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
+#include <QMetaType>
+
 namespace Net
 {
     /**
@@ -30,5 +32,7 @@ namespace Net
         int len;    // length of the data payload pointed to at the data pointer
     };
 }
+
+Q_DECLARE_METATYPE(Net::Message)
 
 #endif
