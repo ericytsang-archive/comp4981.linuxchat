@@ -388,10 +388,10 @@ void ClientWindow::slot_message(int socket, Net::Message msg)
     switch(msg.type)
     {
     case ADD_CLIENT:
-        onAddClient(socket,(char*)msg.data);
+        onAddClient(((int*)msg.data)[0],&((char*)msg.data)[4]);
         break;
     case RM_CLIENT:
-        onRmClient(socket);
+        onRmClient(((int*)msg.data)[0]);
         break;
     case SHOW_MSG:
         appendText((char*)msg.data);
@@ -616,6 +616,7 @@ void ClientWindow::on_pushButton_clicked()
  */
 void ClientWindow::onAddClient(int socket, char* clientName)
 {
+    fprintf(stderr,"add client: %d\n",socket);
     addUserListEntry(socket,QString::fromAscii(clientName));
 }
 
@@ -640,6 +641,7 @@ void ClientWindow::onAddClient(int socket, char* clientName)
  */
 void ClientWindow::onRmClient(int socket)
 {
+    fprintf(stderr,"rm client: %d\n",socket);
     rmUserListEntry(socket);
 }
 

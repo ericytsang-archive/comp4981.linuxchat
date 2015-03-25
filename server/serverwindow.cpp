@@ -323,9 +323,17 @@ void ServerWindow::slot_connect(int socket)
     {
         QListWidgetItem* currListItem = client.value();
 
-        newClntMsg.data = (void*)currListItem->text().toStdString().c_str();
-        newClntMsg.len  = strlen((char*)newClntMsg.data)+1;
+        char* newname = (char*) currListItem->text().toStdString().c_str();
+
+        newClntMsg.len  = strlen(newname)+1+sizeof(int);
+        newClntMsg.data = malloc(newClntMsg.len);
+
+        ((int*)newClntMsg.data)[0] = client.key();
+        memcpy(&((char*)newClntMsg.data)[4],newname,strlen(newname)+1);
+
         send(socket,newClntMsg);
+
+        free(newClntMsg.data);
     }
 }
 
@@ -397,12 +405,12 @@ void ServerWindow::slot_disconnect(int socket, int remote)
     // iterate through remaining users, and tell them who left
     Net::Message rmClntMsg;
     rmClntMsg.type = RM_CLIENT;
+    rmClntMsg.data = &socket;
+    rmClntMsg.len  = sizeof(socket);
     for(auto client = lis.begin(); client != lis.end(); ++client)
     {
         int currSocket = client.key();
 
-        rmClntMsg.data = &socket;
-        rmClntMsg.len  = sizeof(socket);
         send(currSocket,rmClntMsg);
     }
 }
@@ -610,13 +618,21 @@ void ServerWindow::onCheckUserName(int socket, char* cname)
     addUserListEntry(socket,name);
 
     // tell all clients that a new client has connected
+    char* newname = (char*) name.toStdString().c_str();
+
     Net::Message newClntMsg;
     newClntMsg.type = ADD_CLIENT;
-    newClntMsg.data = (void*)name.toStdString().c_str();
-    newClntMsg.len  = strlen((char*)newClntMsg.data)+1;
+    newClntMsg.len  = strlen(newname)+1+sizeof(int);
+    newClntMsg.data = malloc(newClntMsg.len);
+
+    ((int*)newClntMsg.data)[0] = socket;
+    memcpy(&((char*)newClntMsg.data)[4],newname,strlen(newname)+1);
+
     for(auto client = lis.begin(); client != lis.end(); ++client)
     {
         int currSocket = client.key();
         send(currSocket,newClntMsg);
     }
+
+    free(newClntMsg.data);
 }
