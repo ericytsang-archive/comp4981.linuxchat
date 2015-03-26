@@ -13,6 +13,7 @@
 #include <QtGui/QAction>
 #include <QtGui/QApplication>
 #include <QtGui/QButtonGroup>
+#include <QtGui/QGridLayout>
 #include <QtGui/QHeaderView>
 #include <QtGui/QLabel>
 #include <QtGui/QListWidget>
@@ -31,9 +32,10 @@ public:
     QAction *actionDisconnect;
     QAction *actionConnect;
     QWidget *centralWidget;
-    QTextBrowser *textBrowser;
-    QLabel *label;
+    QGridLayout *gridLayout;
     QListWidget *listWidget;
+    QLabel *label;
+    QTextBrowser *textBrowser;
     QStatusBar *statusBar;
     QToolBar *mainToolBar;
 
@@ -41,7 +43,7 @@ public:
     {
         if (ServerWindow->objectName().isEmpty())
             ServerWindow->setObjectName(QString::fromUtf8("ServerWindow"));
-        ServerWindow->resize(883, 563);
+        ServerWindow->resize(404, 313);
         actionSettings = new QAction(ServerWindow);
         actionSettings->setObjectName(QString::fromUtf8("actionSettings"));
         actionDisconnect = new QAction(ServerWindow);
@@ -51,25 +53,41 @@ public:
         actionConnect->setCheckable(true);
         centralWidget = new QWidget(ServerWindow);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
-        textBrowser = new QTextBrowser(centralWidget);
-        textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
-        textBrowser->setGeometry(QRect(200, 10, 671, 481));
+        gridLayout = new QGridLayout(centralWidget);
+        gridLayout->setSpacing(6);
+        gridLayout->setContentsMargins(11, 11, 11, 11);
+        gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
+        listWidget = new QListWidget(centralWidget);
+        listWidget->setObjectName(QString::fromUtf8("listWidget"));
+        listWidget->setMinimumSize(QSize(114, 0));
+        listWidget->setMaximumSize(QSize(182, 90000));
+        listWidget->setSelectionMode(QAbstractItemView::NoSelection);
+
+        gridLayout->addWidget(listWidget, 1, 0, 1, 1);
+
         label = new QLabel(centralWidget);
         label->setObjectName(QString::fromUtf8("label"));
-        label->setGeometry(QRect(10, 10, 131, 20));
+        label->setMinimumSize(QSize(182, 21));
+        label->setMaximumSize(QSize(182, 21));
         QFont font;
         font.setPointSize(11);
         label->setFont(font);
-        listWidget = new QListWidget(centralWidget);
-        listWidget->setObjectName(QString::fromUtf8("listWidget"));
-        listWidget->setGeometry(QRect(10, 30, 181, 461));
-        listWidget->setSelectionMode(QAbstractItemView::NoSelection);
+
+        gridLayout->addWidget(label, 0, 0, 1, 1);
+
+        textBrowser = new QTextBrowser(centralWidget);
+        textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
+        textBrowser->setMinimumSize(QSize(0, 0));
+
+        gridLayout->addWidget(textBrowser, 1, 1, 1, 1);
+
         ServerWindow->setCentralWidget(centralWidget);
         statusBar = new QStatusBar(ServerWindow);
         statusBar->setObjectName(QString::fromUtf8("statusBar"));
         ServerWindow->setStatusBar(statusBar);
         mainToolBar = new QToolBar(ServerWindow);
         mainToolBar->setObjectName(QString::fromUtf8("mainToolBar"));
+        mainToolBar->setMovable(false);
         ServerWindow->addToolBar(Qt::TopToolBarArea, mainToolBar);
 
         mainToolBar->addAction(actionConnect);
