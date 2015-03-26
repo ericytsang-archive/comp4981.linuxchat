@@ -13,6 +13,7 @@
 #include <QtGui/QAction>
 #include <QtGui/QApplication>
 #include <QtGui/QButtonGroup>
+#include <QtGui/QGridLayout>
 #include <QtGui/QHeaderView>
 #include <QtGui/QLabel>
 #include <QtGui/QListWidget>
@@ -33,11 +34,12 @@ public:
     QAction *actionDisconnect;
     QAction *actionSettings;
     QWidget *centralWidget;
-    QPushButton *pushButton;
-    QTextBrowser *textBrowser;
+    QGridLayout *gridLayout;
     QTextEdit *textEdit;
+    QPushButton *pushButton;
     QLabel *label;
     QListWidget *listWidget;
+    QTextBrowser *textBrowser;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
 
@@ -45,7 +47,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QString::fromUtf8("MainWindow"));
-        MainWindow->resize(883, 561);
+        MainWindow->resize(471, 371);
         actionConnect = new QAction(MainWindow);
         actionConnect->setObjectName(QString::fromUtf8("actionConnect"));
         actionConnect->setCheckable(true);
@@ -55,17 +57,14 @@ public:
         actionSettings->setObjectName(QString::fromUtf8("actionSettings"));
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
-        pushButton = new QPushButton(centralWidget);
-        pushButton->setObjectName(QString::fromUtf8("pushButton"));
-        pushButton->setGeometry(QRect(790, 410, 81, 81));
-        pushButton->setLayoutDirection(Qt::LeftToRight);
-        pushButton->setAutoFillBackground(false);
-        textBrowser = new QTextBrowser(centralWidget);
-        textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
-        textBrowser->setGeometry(QRect(190, 10, 681, 391));
+        gridLayout = new QGridLayout(centralWidget);
+        gridLayout->setSpacing(6);
+        gridLayout->setContentsMargins(11, 11, 11, 11);
+        gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
         textEdit = new QTextEdit(centralWidget);
         textEdit->setObjectName(QString::fromUtf8("textEdit"));
-        textEdit->setGeometry(QRect(190, 410, 591, 81));
+        textEdit->setMinimumSize(QSize(0, 81));
+        textEdit->setMaximumSize(QSize(16777215, 81));
         QFont font;
         font.setFamily(QString::fromUtf8("Comic Sans MS"));
         font.setPointSize(11);
@@ -73,19 +72,46 @@ public:
         textEdit->viewport()->setProperty("cursor", QVariant(QCursor(Qt::IBeamCursor)));
         textEdit->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         textEdit->setCursorWidth(1);
+
+        gridLayout->addWidget(textEdit, 2, 1, 1, 1);
+
+        pushButton = new QPushButton(centralWidget);
+        pushButton->setObjectName(QString::fromUtf8("pushButton"));
+        pushButton->setMinimumSize(QSize(81, 81));
+        pushButton->setMaximumSize(QSize(81, 81));
+        pushButton->setLayoutDirection(Qt::LeftToRight);
+        pushButton->setAutoFillBackground(false);
+
+        gridLayout->addWidget(pushButton, 2, 2, 1, 1);
+
         label = new QLabel(centralWidget);
         label->setObjectName(QString::fromUtf8("label"));
-        label->setGeometry(QRect(10, 10, 131, 20));
+        label->setMinimumSize(QSize(131, 20));
+        label->setMaximumSize(QSize(131, 20));
         QFont font1;
         font1.setPointSize(11);
         label->setFont(font1);
+
+        gridLayout->addWidget(label, 0, 0, 1, 1);
+
         listWidget = new QListWidget(centralWidget);
         listWidget->setObjectName(QString::fromUtf8("listWidget"));
-        listWidget->setGeometry(QRect(10, 30, 171, 461));
+        listWidget->setMinimumSize(QSize(0, 0));
+        listWidget->setMaximumSize(QSize(171, 16777215));
         listWidget->setSelectionMode(QAbstractItemView::NoSelection);
+
+        gridLayout->addWidget(listWidget, 1, 0, 2, 1);
+
+        textBrowser = new QTextBrowser(centralWidget);
+        textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
+        textBrowser->setMinimumSize(QSize(316, 181));
+
+        gridLayout->addWidget(textBrowser, 1, 1, 1, 2);
+
         MainWindow->setCentralWidget(centralWidget);
         mainToolBar = new QToolBar(MainWindow);
         mainToolBar->setObjectName(QString::fromUtf8("mainToolBar"));
+        mainToolBar->setMovable(false);
         MainWindow->addToolBar(Qt::TopToolBarArea, mainToolBar);
         statusBar = new QStatusBar(MainWindow);
         statusBar->setObjectName(QString::fromUtf8("statusBar"));

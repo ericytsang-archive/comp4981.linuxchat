@@ -22,23 +22,36 @@ static const uint qt_meta_data_ServerWindow[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-       3,   14, // methods
+       9,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
-       0,       // signalCount
+       3,       // signalCount
+
+ // signals: signature, parameters, type, tag, flags
+      21,   14,   13,   13, 0x05,
+      48,   37,   13,   13, 0x05,
+      91,   77,   13,   13, 0x05,
 
  // slots: signature, parameters, type, tag, flags
-      14,   13,   13,   13, 0x08,
-      43,   13,   13,   13, 0x08,
-      75,   13,   13,   13, 0x08,
+     114,   14,   13,   13, 0x0a,
+     132,   37,   13,   13, 0x0a,
+     163,   77,   13,   13, 0x0a,
+     188,   13,   13,   13, 0x0a,
+     217,   13,   13,   13, 0x0a,
+     249,   13,   13,   13, 0x0a,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_ServerWindow[] = {
-    "ServerWindow\0\0on_actionConnect_triggered()\0"
+    "ServerWindow\0\0socket\0sigConnect(int)\0"
+    "socket,msg\0sigMessage(int,Net::Message)\0"
+    "socket,remote\0sigDisconnect(int,int)\0"
+    "slot_connect(int)\0slot_message(int,Net::Message)\0"
+    "slot_disconnect(int,int)\0"
+    "on_actionConnect_triggered()\0"
     "on_actionDisconnect_triggered()\0"
     "on_actionSettings_triggered()\0"
 };
@@ -49,13 +62,18 @@ void ServerWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id
         Q_ASSERT(staticMetaObject.cast(_o));
         ServerWindow *_t = static_cast<ServerWindow *>(_o);
         switch (_id) {
-        case 0: _t->on_actionConnect_triggered(); break;
-        case 1: _t->on_actionDisconnect_triggered(); break;
-        case 2: _t->on_actionSettings_triggered(); break;
+        case 0: _t->sigConnect((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 1: _t->sigMessage((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< Net::Message(*)>(_a[2]))); break;
+        case 2: _t->sigDisconnect((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
+        case 3: _t->slot_connect((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 4: _t->slot_message((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< Net::Message(*)>(_a[2]))); break;
+        case 5: _t->slot_disconnect((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
+        case 6: _t->on_actionConnect_triggered(); break;
+        case 7: _t->on_actionDisconnect_triggered(); break;
+        case 8: _t->on_actionSettings_triggered(); break;
         default: ;
         }
     }
-    Q_UNUSED(_a);
 }
 
 const QMetaObjectExtraData ServerWindow::staticMetaObjectExtraData = {
@@ -92,10 +110,31 @@ int ServerWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 3)
+        if (_id < 9)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 3;
+        _id -= 9;
     }
     return _id;
+}
+
+// SIGNAL 0
+void ServerWindow::sigConnect(int _t1)
+{
+    void *_a[] = { 0, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
+    QMetaObject::activate(this, &staticMetaObject, 0, _a);
+}
+
+// SIGNAL 1
+void ServerWindow::sigMessage(int _t1, Net::Message _t2)
+{
+    void *_a[] = { 0, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
+    QMetaObject::activate(this, &staticMetaObject, 1, _a);
+}
+
+// SIGNAL 2
+void ServerWindow::sigDisconnect(int _t1, int _t2)
+{
+    void *_a[] = { 0, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
+    QMetaObject::activate(this, &staticMetaObject, 2, _a);
 }
 QT_END_MOC_NAMESPACE
